@@ -1,18 +1,16 @@
 'use server';
 
-import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { addInventoryItemSchema, logConsumptionSchema } from '@/lib/validations';
+import { createInventoryItem, logMaterialConsumption, getInventoryItem, updateInventoryQuantity } from '@/lib/db';
 
 export async function addInventoryItem(name: string, unitType: string, initialQuantity: number) {
   try {
     const validatedData = addInventoryItemSchema.parse({ name, unitType, initialQuantity });
-    await prisma.inventoryItem.create({
-      data: {
-        name: validatedData.name,
-        unitType: validatedData.unitType,
-        quantity: validatedData.initialQuantity
-      }
+    await createInventoryItem({
+      name: validatedData.name,
+      unitType: validatedData.unitType,
+      quantity: validatedData.initialQuantity
     });
     revalidatePath('/admin/inventory');
     return { success: true };
@@ -25,24 +23,28 @@ export async function logConsumption(orderId: string, inventoryItemId: string, q
   try {
     const validatedData = logConsumptionSchema.parse({ orderId, inventoryItemId, quantityUsed, wastage, workerId });
 
-    // Start a transaction: Record consumption and deduct stock
-    await prisma.$transaction(async (tx) => {
-      await tx.materialConsumption.create({
-        data: {
-          inventoryItemId: validatedData.inventoryItemId,
-          orderId: validatedData.orderId,
-          quantityUsed: validatedData.quantityUsed,
-          wastage: validatedData.wastage,
-          workerId: validatedData.workerId
-        }
-      });
+    // In Data Connect we do not have an atomic decrement via auto-generated mutations yet, so we read, calculate, and write.
+    const inventoryResult = await getInventoryItem({ id: validatedData.inventoryItemId });
+    const currentItem = inventoryResult.data.inventoryItem;
+    if (!currentItem) {
+      throw new Error('Inventory item not found');
+    }
 
-      const totalDeduction = validatedData.quantityUsed + validatedData.wastage;
+    const totalDeduction = validatedData.quantityUsed + validatedData.wastage;
+    const newQuantity = currentItem.quantity - totalDeduction;
 
-      await tx.inventoryItem.update({
-        where: { id: validatedData.inventoryItemId },
-        data: { quantity: { decrement: totalDeduction } }
-      });
+    // Log the consumption
+    await logMaterialConsumption({
+      inventoryItemId: validatedData.inventoryItemId,
+      orderId: validatedData.orderId,
+      quantityUsed: validatedData.quantityUsed,
+      wastage: validatedData.wastage,
+    });
+
+    // Update the inventory
+    await updateInventoryQuantity({
+      id: validatedData.inventoryItemId,
+      quantity: newQuantity
     });
 
     revalidatePath(`/worker/job/${validatedData.orderId}`);

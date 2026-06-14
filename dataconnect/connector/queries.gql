@@ -1,0 +1,329 @@
+query GetUserById($id: UUID!) @auth(level: PUBLIC) {
+  user(id: $id) {
+    id
+    name
+    email
+    phone
+    role
+    organization {
+      id
+      name
+    }
+  }
+}
+
+query ListCategories @auth(level: PUBLIC) {
+  categories {
+    id
+    name
+    imageUrl
+    services_on_category {
+      id
+      name
+      pricingType
+      basePrice
+    }
+  }
+}
+
+query GetCategoryServices($categoryId: UUID!) @auth(level: PUBLIC) {
+  services(where: { categoryId: { eq: $categoryId } }) {
+    id
+    name
+    description
+    pricingType
+    basePrice
+    imageUrl
+  }
+}
+
+query GetOrder($id: UUID!) @auth(level: PUBLIC) {
+  order(id: $id) {
+    id
+    orderNumber
+    status
+    totalAmount
+    user {
+      id
+      name
+      phone
+    }
+  }
+}
+
+query ListOrdersByUser($userId: UUID!) @auth(level: PUBLIC) {
+  orders(where: { userId: { eq: $userId } }) {
+    id
+    orderNumber
+    status
+    totalAmount
+    createdAt
+  }
+}
+
+query ListInventoryItems @auth(level: PUBLIC) {
+  inventoryItems {
+    id
+    name
+    unitType
+    quantity
+  }
+}
+
+query GetInventoryItem($id: UUID!) @auth(level: PUBLIC) {
+  inventoryItem(id: $id) {
+    id
+    quantity
+  }
+}
+
+query GetUserByIdentifier($identifier: String!) @auth(level: PUBLIC) {
+  users(where: {
+    _or: [
+      { email: { eq: $identifier } },
+      { phone: { eq: $identifier } }
+    ]
+  }) {
+    id
+    name
+    email
+    phone
+    role
+  }
+}
+
+query GetDelivery($id: UUID!) @auth(level: PUBLIC) {
+  delivery(id: $id) {
+    id
+    orderId
+    status
+    address
+    driverId
+  }
+}
+
+query GetOrderProofs($id: UUID!) @auth(level: PUBLIC) {
+  order(id: $id) {
+    id
+    proofs_on_order {
+      id
+      version
+      status
+    }
+  }
+}
+
+query GetProof($id: UUID!) @auth(level: PUBLIC) {
+  proof(id: $id) {
+    id
+    orderId
+  }
+}
+
+query ListRecentOrders @auth(level: PUBLIC) {
+  orders(orderBy: { createdAt: DESC }) {
+    id
+    orderNumber
+    status
+    totalAmount
+    createdAt
+    user {
+      id
+      email
+      phone
+    }
+    orderItems_on_order {
+      id
+      quantity
+      price
+      service {
+        name
+      }
+    }
+  }
+}
+
+query ListActiveDeliveries @auth(level: PUBLIC) {
+  deliveries(where: { status: { ne: "DELIVERED" } }, orderBy: { createdAt: DESC }) {
+    id
+    address
+    status
+    order {
+      orderNumber
+      user {
+        name
+        phone
+      }
+    }
+  }
+}
+
+query ListUsersByRole($role: String!) @auth(level: PUBLIC) {
+  users(where: { role: { eq: $role } }) {
+    id
+    name
+    email
+  }
+}
+
+query ListAllOrdersForIntelligence @auth(level: PUBLIC) {
+  orders(orderBy: { createdAt: DESC }) {
+    id
+    status
+    totalAmount
+    createdAt
+    user {
+      id
+      name
+      phone
+    }
+    materialConsumptions_on_order {
+      workerId
+    }
+  }
+}
+
+query ListWastedConsumptions @auth(level: PUBLIC) {
+  materialConsumptions(where: { wastage: { gt: 0 } }) {
+    id
+    wastage
+    inventoryItem {
+      name
+    }
+  }
+}
+
+query GetOrderWithDetails($id: UUID!) @auth(level: PUBLIC) {
+  order(id: $id) {
+    id
+    orderNumber
+    status
+    totalAmount
+    user {
+      name
+      phone
+      email
+    }
+    orderItems_on_order {
+      id
+      quantity
+      price
+      specs
+      service {
+        name
+      }
+    }
+    proofs_on_order(orderBy: { version: DESC }) {
+      id
+      version
+      status
+      fileUrl
+    }
+    payments_on_order {
+      id
+      amount
+      status
+    }
+  }
+}
+
+query ListOrdersForQC @auth(level: PUBLIC) {
+  orders(where: { status: { in: ["FINISHING", "QC_REJECTED"] } }, orderBy: { updatedAt: DESC }) {
+    id
+    orderNumber
+    status
+    user {
+      name
+      phone
+    }
+    orderItems_on_order {
+      id
+      quantity
+      service {
+        name
+      }
+    }
+  }
+}
+
+query ListOrdersByUserWithDetails($userId: UUID!) @auth(level: PUBLIC) {
+  orders(where: { userId: { eq: $userId } }, orderBy: { createdAt: DESC }) {
+    id
+    orderNumber
+    status
+    totalAmount
+    createdAt
+    orderItems_on_order {
+      id
+      service {
+        name
+      }
+    }
+    payments_on_order {
+      id
+      status
+    }
+    proofs_on_order(orderBy: { version: DESC }) {
+      id
+      version
+      status
+      fileUrl
+      comments
+    }
+  }
+}
+
+query GetWorkerJob($id: UUID!) @auth(level: PUBLIC) {
+  order(id: $id) {
+    id
+    orderNumber
+    status
+    orderItems_on_order {
+      id
+      quantity
+      specs
+      service {
+        name
+      }
+    }
+  }
+}
+
+query ListOrganizationsWithUsers @auth(level: PUBLIC) {
+  organizations(orderBy: { name: ASC }) {
+    id
+    name
+    users_on_organization {
+      id
+      name
+      phone
+      email
+    }
+  }
+}
+
+query GetService($id: UUID!) @auth(level: PUBLIC) {
+  service(id: $id) {
+    id
+    name
+    description
+    pricingType
+    basePrice
+    imageUrl
+    category {
+      name
+    }
+  }
+}
+
+query GetPaymentByReference($reference: String!) @auth(level: PUBLIC) {
+  payments(where: { reference: { eq: $reference } }) {
+    id
+    orderId
+    amount
+    status
+    order {
+      status
+    }
+  }
+}

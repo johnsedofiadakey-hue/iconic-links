@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
+import { getUserByIdentifier, createUser, createStaffProfile, createCustomerProfile } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -14,35 +14,31 @@ export async function POST(request: Request) {
     const expiresIn = 60 * 60 * 24 * 5 * 1000;
     const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
     
-    // Synchronize user in Prisma
+    // Synchronize user in Database
     const identifier = decodedToken.email || decodedToken.phone_number;
     
     if (!identifier) {
       throw new Error('Token does not contain email or phone number');
     }
 
-    let user;
-    if (decodedToken.email) {
-      user = await prisma.user.findUnique({ where: { email: decodedToken.email } });
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            email: decodedToken.email,
-            role: 'MANAGER', // Or superadmin based on your logic, default Manager for staff
-            staffProfile: { create: {} }
-          }
+    const userResult = await getUserByIdentifier({ identifier });
+    const users = userResult.data.users;
+
+    if (!users || users.length === 0) {
+      if (decodedToken.email) {
+        const newUserResult = await createUser({
+          email: decodedToken.email,
+          role: 'MANAGER', // Or superadmin based on your logic, default Manager for staff
         });
-      }
-    } else if (decodedToken.phone_number) {
-      user = await prisma.user.findUnique({ where: { phone: decodedToken.phone_number } });
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            phone: decodedToken.phone_number,
-            role: 'CUSTOMER',
-            customerProfile: { create: {} }
-          }
+        const newUserId = newUserResult.data.user_insert.id;
+        await createStaffProfile({ userId: newUserId });
+      } else if (decodedToken.phone_number) {
+        const newUserResult = await createUser({
+          phone: decodedToken.phone_number,
+          role: 'CUSTOMER',
         });
+        const newUserId = newUserResult.data.user_insert.id;
+        await createCustomerProfile({ userId: newUserId });
       }
     }
 

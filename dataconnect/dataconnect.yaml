@@ -1,0 +1,11 @@
+specVersion: "v1alpha"
+serviceId: "iconic-links-db"
+location: "us-central1"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "iconic_links_db"
+      cloudSql:
+        instanceId: "iconic-links-sql"
+connectorDirs: ["./connector"]

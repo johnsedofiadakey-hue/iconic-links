@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import { adminAuth } from '@/lib/firebase/admin';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getUserByIdentifier, listRecentOrders } from '@/lib/db';
 
 export default async function AdminDashboard() {
   const cookieStore = await cookies();
@@ -13,19 +13,21 @@ export default async function AdminDashboard() {
   let user;
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    user = await prisma.user.findFirst({
-      where: { email: decodedClaims.email }
-    });
+    const identifier = decodedClaims.email || decodedClaims.phone_number;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        user = userResult.data.users[0];
+      }
+    }
   } catch (error) {
     redirect('/admin/login');
   }
 
   if (!user || user.role === 'CUSTOMER') redirect('/admin/login');
 
-  const orders = await prisma.order.findMany({
-    include: { user: true, items: { include: { service: true } } },
-    orderBy: { createdAt: 'desc' }
-  });
+  const ordersResult = await listRecentOrders();
+  const orders = ordersResult.data.orders;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,12 +46,12 @@ export default async function AdminDashboard() {
         
         <div className="bg-white shadow overflow-hidden sm:rounded-md border border-gray-200">
           <ul className="divide-y divide-gray-200">
-            {orders.map(order => (
+            {orders.map((order: any) => (
               <li key={order.id}>
                 <div className="px-4 py-4 sm:px-6 hover:bg-gray-50 transition cursor-pointer">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-blue-600 truncate">
-                      {order.orderNumber} - {order.user.phone || order.user.email}
+                      {order.orderNumber} - {order.user?.phone || order.user?.email}
                     </p>
                     <div className="ml-2 flex-shrink-0 flex">
                       <p className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -64,7 +66,7 @@ export default async function AdminDashboard() {
                   <div className="mt-2 sm:flex sm:justify-between">
                     <div className="sm:flex">
                       <p className="flex items-center text-sm text-gray-500">
-                        {order.items[0]?.service.name} (Qty: {order.items[0]?.quantity})
+                        {order.orderItems_on_order[0]?.service?.name} (Qty: {order.orderItems_on_order[0]?.quantity})
                       </p>
                     </div>
                     <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">

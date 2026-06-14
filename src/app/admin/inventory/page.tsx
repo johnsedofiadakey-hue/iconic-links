@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
 import InventoryAddForm from './InventoryAddForm';
+import { getUserByIdentifier, listInventoryItems } from '@/lib/db';
 
 export default async function AdminInventoryPage() {
   const cookieStore = await cookies();
@@ -13,7 +13,13 @@ export default async function AdminInventoryPage() {
   let user;
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    user = await prisma.user.findFirst({ where: { email: decodedClaims.email } });
+    const identifier = decodedClaims.email || decodedClaims.phone_number;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        user = userResult.data.users[0];
+      }
+    }
   } catch {
     redirect('/admin/login');
   }
@@ -22,9 +28,8 @@ export default async function AdminInventoryPage() {
     redirect('/admin/dashboard');
   }
 
-  const items = await prisma.inventoryItem.findMany({
-    orderBy: { name: 'asc' }
-  });
+  const itemsResult = await listInventoryItems();
+  const items = itemsResult.data.inventoryItems;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -52,7 +57,7 @@ export default async function AdminInventoryPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {items.map(item => (
+                {items.map((item: any) => (
                   <tr key={item.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.unitType}</td>

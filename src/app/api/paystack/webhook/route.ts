@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import prisma from '@/lib/prisma';
+import { getPaymentByReference, updatePaymentStatus, updateOrderStatus } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
@@ -21,22 +21,27 @@ export async function POST(request: Request) {
       const data = event.data;
       const reference = data.reference;
 
-      // Update payment record
-      const payment = await prisma.payment.update({
-        where: { reference },
-        data: {
+      // Find payment record
+      const paymentResult = await getPaymentByReference({ reference });
+      const payments = paymentResult.data.payments;
+      
+      if (payments.length > 0) {
+        const payment = payments[0];
+
+        // Update payment record
+        await updatePaymentStatus({
+          id: payment.id,
           status: 'SUCCESS',
           paystackRef: String(data.id)
-        },
-        include: { order: true }
-      });
-
-      // Update order status if full payment is received (simplification for MVP)
-      if (payment.order.status === 'AWAITING_PAYMENT') {
-        await prisma.order.update({
-          where: { id: payment.orderId },
-          data: { status: 'PREFLIGHT' } // Valid enum value
         });
+
+        // Update order status if full payment is received (simplification for MVP)
+        if (payment.order?.status === 'AWAITING_PAYMENT') {
+          await updateOrderStatus({
+            id: payment.orderId,
+            status: 'PREFLIGHT' // Valid enum value
+          });
+        }
       }
     }
 

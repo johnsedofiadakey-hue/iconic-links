@@ -1,11 +1,11 @@
 'use server';
 
-import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { createOrganization as dcCreateOrganization, updateUserOrganization } from '@/lib/db';
 
 export async function createOrganization(name: string) {
   try {
-    await prisma.organization.create({ data: { name } });
+    await dcCreateOrganization({ name });
     revalidatePath('/admin/organizations');
     return { success: true };
   } catch (error: any) {
@@ -15,9 +15,9 @@ export async function createOrganization(name: string) {
 
 export async function linkUserToOrganization(userId: string, organizationId: string) {
   try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { organizationId }
+    await updateUserOrganization({
+      id: userId,
+      organizationId
     });
     revalidatePath('/admin/organizations');
     return { success: true };

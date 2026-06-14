@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import { adminAuth } from '@/lib/firebase/admin';
 import Link from 'next/link';
 import { Package, Clock } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import ProofReviewPanel from './ProofReviewPanel';
+import { getUserByIdentifier, listOrdersByUserWithDetails } from '@/lib/db';
 
 export default async function CustomerDashboard() {
   const cookieStore = await cookies();
@@ -15,20 +15,21 @@ export default async function CustomerDashboard() {
   let user;
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    user = await prisma.user.findFirst({
-      where: { phone: decodedClaims.phone_number }
-    });
+    const identifier = decodedClaims.phone_number || decodedClaims.email;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        user = userResult.data.users[0];
+      }
+    }
   } catch (error) {
     redirect('/login');
   }
 
   if (!user) redirect('/login');
 
-  const orders = await prisma.order.findMany({
-    where: { userId: user.id },
-    include: { items: { include: { service: true } }, payments: true, proofs: { orderBy: { version: 'desc' } } },
-    orderBy: { createdAt: 'desc' }
-  });
+  const ordersResult = await listOrdersByUserWithDetails({ userId: user.id });
+  const orders = ordersResult.data.orders;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -51,13 +52,13 @@ export default async function CustomerDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
-            {orders.map(order => (
+            {orders.map((order: any) => (
               <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
                 <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
                   <div>
                     <span className="text-xs font-bold text-gray-500 tracking-wider">ORDER {order.orderNumber}</span>
                     <h3 className="font-bold text-lg text-gray-900 mt-1">
-                      {order.items[0]?.service.name} {order.items.length > 1 && `+ ${order.items.length - 1} more`}
+                      {order.orderItems_on_order?.[0]?.service?.name} {order.orderItems_on_order?.length > 1 && `+ ${order.orderItems_on_order.length - 1} more`}
                     </h3>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -72,7 +73,7 @@ export default async function CustomerDashboard() {
                 <div className="flex justify-between items-center text-sm">
                   <div className="flex items-center text-gray-500">
                     <Clock className="w-4 h-4 mr-1" />
-                    {order.createdAt.toLocaleDateString()}
+                    {new Date(order.createdAt).toLocaleDateString()}
                   </div>
                   <div className="font-bold text-gray-900">
                     GHS {order.totalAmount.toFixed(2)}
@@ -80,8 +81,8 @@ export default async function CustomerDashboard() {
                 </div>
 
                 {/* Show Proof Review if Awaiting Approval */}
-                {order.status === 'AWAITING_APPROVAL' && order.proofs && order.proofs[0] && (
-                  <ProofReviewPanel proof={order.proofs[0]} userId={user.id} />
+                {order.status === 'AWAITING_APPROVAL' && order.proofs_on_order && order.proofs_on_order[0] && (
+                  <ProofReviewPanel proof={order.proofs_on_order[0]} userId={user.id} />
                 )}
               </div>
             ))}

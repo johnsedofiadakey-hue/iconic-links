@@ -1,0 +1,75 @@
+mutation CreateUser($phone: String, $email: String, $name: String, $role: String!) @auth(level: PUBLIC) {
+  user_insert(data: { phone: $phone, email: $email, name: $name, role: $role })
+}
+
+mutation CreateOrder($userId: UUID!, $orderNumber: String!, $totalAmount: Float!) @auth(level: PUBLIC) {
+  order_insert(data: { userId: $userId, orderNumber: $orderNumber, totalAmount: $totalAmount })
+}
+
+mutation UpdateOrderStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
+  order_update(id: $id, data: { status: $status })
+}
+
+mutation CreateCategory($name: String!) @auth(level: PUBLIC) {
+  category_insert(data: { name: $name })
+}
+
+mutation CreateService($categoryId: UUID!, $name: String!, $pricingType: String!, $basePrice: Float) @auth(level: PUBLIC) {
+  service_insert(data: { categoryId: $categoryId, name: $name, pricingType: $pricingType, basePrice: $basePrice })
+}
+
+mutation UpdateInventoryQuantity($id: UUID!, $quantity: Float!) @auth(level: PUBLIC) {
+  inventoryItem_update(id: $id, data: { quantity: $quantity })
+}
+
+mutation CreateInventoryItem($name: String!, $unitType: String!, $quantity: Float!) @auth(level: PUBLIC) {
+  inventoryItem_insert(data: { name: $name, unitType: $unitType, quantity: $quantity })
+}
+
+mutation LogMaterialConsumption($inventoryItemId: UUID!, $orderId: UUID!, $quantityUsed: Float!, $wastage: Float!) @auth(level: PUBLIC) {
+  materialConsumption_insert(data: { inventoryItemId: $inventoryItemId, orderId: $orderId, quantityUsed: $quantityUsed, wastage: $wastage })
+}
+
+mutation CreateOrderItem($orderId: UUID!, $serviceId: UUID!, $quantity: Int!, $price: Float!, $specs: Any) @auth(level: PUBLIC) {
+  orderItem_insert(data: { orderId: $orderId, serviceId: $serviceId, quantity: $quantity, price: $price, specs: $specs })
+}
+
+mutation CreateDelivery($orderId: UUID!, $address: String!, $status: String!) @auth(level: PUBLIC) {
+  delivery_insert(data: { orderId: $orderId, address: $address, status: $status })
+}
+
+mutation UpdateDelivery($id: UUID!, $driverId: UUID, $status: String) @auth(level: PUBLIC) {
+  delivery_update(id: $id, data: { driverId: $driverId, status: $status })
+}
+
+mutation CreateOrganization($name: String!) @auth(level: PUBLIC) {
+  organization_insert(data: { name: $name })
+}
+
+mutation UpdateUserOrganization($id: UUID!, $organizationId: UUID!) @auth(level: PUBLIC) {
+  user_update(id: $id, data: { organizationId: $organizationId })
+}
+
+mutation CreateProof($orderId: UUID!, $fileUrl: String!, $version: Int!, $status: String!) @auth(level: PUBLIC) {
+  proof_insert(data: { orderId: $orderId, fileUrl: $fileUrl, version: $version, status: $status })
+}
+
+mutation UpdateProof($id: UUID!, $status: String!, $approvedBy: String, $comments: String) @auth(level: PUBLIC) {
+  proof_update(id: $id, data: { status: $status, approvedBy: $approvedBy, comments: $comments })
+}
+
+mutation CreateStaffProfile($userId: UUID!) @auth(level: PUBLIC) {
+  staffProfile_insert(data: { userId: $userId })
+}
+
+mutation CreateCustomerProfile($userId: UUID!) @auth(level: PUBLIC) {
+  customerProfile_insert(data: { userId: $userId })
+}
+
+mutation CreatePayment($orderId: UUID!, $amount: Float!, $reference: String!) @auth(level: PUBLIC) {
+  payment_insert(data: { orderId: $orderId, amount: $amount, reference: $reference, status: "PENDING" })
+}
+
+mutation UpdatePaymentStatus($id: UUID!, $status: String!, $paystackRef: String) @auth(level: PUBLIC) {
+  payment_update(id: $id, data: { status: $status, paystackRef: $paystackRef })
+}

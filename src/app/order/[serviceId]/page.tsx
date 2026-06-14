@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation';
-import prisma from '@/lib/prisma';
 import OrderConfigurator from './OrderConfigurator';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { getService } from '@/lib/db';
 
 export default async function OrderPage({ params }: { params: { serviceId: string } }) {
-  const service = await prisma.service.findUnique({
-    where: { id: params.serviceId },
-    include: { category: true }
-  });
+  const serviceResult = await getService({ id: params.serviceId });
+  const service = serviceResult.data.service;
 
   if (!service) {
     notFound();
@@ -26,7 +24,7 @@ export default async function OrderPage({ params }: { params: { serviceId: strin
       <main className="max-w-2xl mx-auto px-4 pt-6">
         <div className="mb-8">
           <span className="text-xs font-bold tracking-wider text-blue-600 uppercase">
-            {service.category.name}
+            {service.category?.name}
           </span>
           <h2 className="text-3xl font-extrabold text-gray-900 mt-1">{service.name}</h2>
           <p className="text-gray-500 mt-2">

@@ -1,6 +1,8 @@
 import { getCategories, createCategory, createService } from '@/app/actions/catalog';
 import { PlusCircle } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ServicesPage() {
   const categories = await getCategories();
 
@@ -68,11 +70,11 @@ export default async function ServicesPage() {
           {categories.map(category => (
             <div key={category.id} className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 border-b pb-2 mb-4">{category.name}</h3>
-              {category.services.length === 0 ? (
+              {category.services_on_category?.length === 0 ? (
                 <p className="text-sm text-gray-500">No services in this category yet.</p>
               ) : (
                 <ul className="divide-y divide-gray-200">
-                  {category.services.map(service => (
+                  {category.services_on_category?.map((service: any) => (
                     <li key={service.id} className="py-3 flex justify-between items-center">
                       <span className="font-medium text-gray-800">{service.name}</span>
                       <div className="flex space-x-4 text-sm">

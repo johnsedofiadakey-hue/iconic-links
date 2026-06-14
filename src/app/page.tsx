@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { getCategories } from '@/app/actions/catalog';
 import { ChevronRight, Printer, User } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const categories = await getCategories();
 
@@ -30,7 +32,7 @@ export default async function HomePage() {
                 <h3 className="font-bold text-lg text-gray-900">{category.name}</h3>
               </div>
               <ul className="divide-y divide-gray-50">
-                {category.services.map((service) => (
+                {category.services_on_category?.map((service: any) => (
                   <li key={service.id}>
                     <Link href={`/order/${service.id}`} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
                       <div>
@@ -45,7 +47,7 @@ export default async function HomePage() {
                     </Link>
                   </li>
                 ))}
-                {category.services.length === 0 && (
+                {category.services_on_category?.length === 0 && (
                   <li className="p-4 text-sm text-gray-400 italic">No services available yet.</li>
                 )}
               </ul>

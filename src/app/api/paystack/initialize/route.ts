@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 import crypto from 'crypto';
+import { getOrder, createPayment } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
     const { orderId, email, amount } = await request.json();
 
-    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    const orderResult = await getOrder({ id: orderId });
+    const order = orderResult.data.order;
     if (!order || order.status !== 'AWAITING_PAYMENT') {
       return NextResponse.json({ error: 'Invalid order or order is not awaiting payment' }, { status: 400 });
     }
@@ -16,13 +17,10 @@ export async function POST(request: Request) {
     const reference = crypto.randomBytes(8).toString('hex');
 
     // Create payment record in DB
-    await prisma.payment.create({
-      data: {
-        orderId: order.id,
-        amount: amount,
-        reference: reference,
-        status: 'PENDING',
-      }
+    await createPayment({
+      orderId: order.id,
+      amount: amount,
+      reference: reference
     });
 
     // Initialize Paystack transaction

@@ -1,13 +1,13 @@
 'use server';
 
-import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { updateOrderStatus as dcUpdateOrderStatus } from '@/lib/db';
 
-export async function updateOrderStatus(orderId: string, newStatus: any, userId: string) {
+export async function updateOrderStatus(orderId: string, newStatus: string, userId: string) {
   try {
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: newStatus }
+    await dcUpdateOrderStatus({
+      id: orderId,
+      status: newStatus
     });
 
     revalidatePath(`/worker/job/${orderId}`);

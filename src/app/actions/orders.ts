@@ -1,10 +1,10 @@
 'use server';
 
-import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { createOrderSchema } from '@/lib/validations';
 import { ORDER_STATUS } from '@/lib/constants';
+import { getUserByIdentifier, createOrder as dcCreateOrder, createOrderItem } from '@/lib/db';
 
 export async function createOrder(data: {
   serviceId: string;
@@ -30,41 +30,38 @@ export async function createOrder(data: {
       return { success: false, error: 'Invalid session' };
     }
 
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: [
-          { email: identifier },
-          { phone: identifier }
-        ]
-      }
-    });
-
-    if (!user) {
+    const userResult = await getUserByIdentifier({ identifier });
+    const users = userResult.data.users;
+    
+    if (!users || users.length === 0) {
       return { success: false, error: 'User not found in database' };
     }
+
+    const user = users[0];
 
     const orderNumber = `ICN-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
     const totalAmount = validatedData.isInstant ? (validatedData.basePrice || 0) * validatedData.quantity : 0;
     const initialStatus = validatedData.isInstant ? ORDER_STATUS.AWAITING_PAYMENT : ORDER_STATUS.AWAITING_QUOTATION;
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: user.id,
-        status: initialStatus,
-        totalAmount,
-        items: {
-          create: {
-            serviceId: validatedData.serviceId,
-            quantity: validatedData.quantity,
-            price: validatedData.isInstant ? (validatedData.basePrice || 0) : 0,
-            specs: validatedData.specs,
-          }
-        }
-      }
+    // Create the order
+    const orderResult = await dcCreateOrder({
+      userId: user.id,
+      orderNumber,
+      totalAmount
+    });
+    
+    const orderId = orderResult.data.order_insert.id;
+
+    // Create the order item
+    await createOrderItem({
+      orderId: orderId,
+      serviceId: validatedData.serviceId,
+      quantity: validatedData.quantity,
+      price: validatedData.isInstant ? (validatedData.basePrice || 0) : 0,
+      specs: validatedData.specs
     });
 
-    return { success: true, order };
+    return { success: true, order: { id: orderId, orderNumber, status: initialStatus, totalAmount } };
   } catch (error: any) {
     console.error('Create order error', error);
     return { success: false, error: error.message };

@@ -1,15 +1,16 @@
 {
-  "storage": {
-    "rules": "storage.rules"
-  },
   "apphosting": {
-    "backendId": "icon-links-app",
+    "backendId": "iconic-links-backend",
     "rootDir": "/",
     "ignore": [
       "node_modules",
       ".git",
       "firebase-debug.log",
-      "firebase-debug.*.log"
+      "firebase-debug.*.log",
+      "functions"
     ]
+  },
+  "dataconnect": {
+    "source": "dataconnect"
   }
 }

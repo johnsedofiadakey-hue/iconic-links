@@ -1,27 +1,26 @@
 'use server';
 
-import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { getOrderProofs, createProof as dcCreateProof, updateProof as dcUpdateProof, updateOrderStatus, getProof } from '@/lib/db';
 
 export async function uploadProof(orderId: string, fileUrl: string) {
   try {
-    const order = await prisma.order.findUnique({ where: { id: orderId }, include: { proofs: true } });
+    const orderResult = await getOrderProofs({ id: orderId });
+    const order = orderResult.data.order;
     if (!order) throw new Error('Order not found');
 
-    const nextVersion = order.proofs.length + 1;
+    const nextVersion = (order.proofs_on_order?.length || 0) + 1;
 
-    await prisma.proof.create({
-      data: {
-        orderId,
-        fileUrl,
-        version: nextVersion,
-        status: 'PENDING'
-      }
+    await dcCreateProof({
+      orderId,
+      fileUrl,
+      version: nextVersion,
+      status: 'PENDING'
     });
 
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: 'AWAITING_APPROVAL' }
+    await updateOrderStatus({
+      id: orderId,
+      status: 'AWAITING_APPROVAL'
     });
 
     revalidatePath('/admin/dashboard');
@@ -34,15 +33,21 @@ export async function uploadProof(orderId: string, fileUrl: string) {
 
 export async function approveProof(proofId: string, userId: string) {
   try {
-    const proof = await prisma.proof.update({
-      where: { id: proofId },
-      data: { status: 'APPROVED', approvedBy: userId }
+    await dcUpdateProof({
+      id: proofId,
+      status: 'APPROVED',
+      approvedBy: userId
     });
 
-    await prisma.order.update({
-      where: { id: proof.orderId },
-      data: { status: 'PRINTING' } // Moves to printing after approval
-    });
+    const proofResult = await getProof({ id: proofId });
+    const orderId = proofResult.data.proof?.orderId;
+    
+    if (orderId) {
+      await updateOrderStatus({
+        id: orderId,
+        status: 'PRINTING' // Moves to printing after approval
+      });
+    }
 
     revalidatePath('/dashboard');
     revalidatePath('/admin/dashboard');
@@ -54,15 +59,21 @@ export async function approveProof(proofId: string, userId: string) {
 
 export async function rejectProof(proofId: string, comments: string) {
   try {
-    const proof = await prisma.proof.update({
-      where: { id: proofId },
-      data: { status: 'REJECTED', comments }
+    await dcUpdateProof({
+      id: proofId,
+      status: 'REJECTED',
+      comments
     });
 
-    await prisma.order.update({
-      where: { id: proof.orderId },
-      data: { status: 'DESIGN_IN_PROGRESS' } // Send back to design
-    });
+    const proofResult = await getProof({ id: proofId });
+    const orderId = proofResult.data.proof?.orderId;
+
+    if (orderId) {
+      await updateOrderStatus({
+        id: orderId,
+        status: 'DESIGN_IN_PROGRESS' // Send back to design
+      });
+    }
 
     revalidatePath('/dashboard');
     revalidatePath('/admin/dashboard');

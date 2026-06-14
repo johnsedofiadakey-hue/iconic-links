@@ -1,11 +1,11 @@
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
-import { format, subDays, startOfDay, endOfDay, getHours, getDay } from 'date-fns';
+import { format, subDays, getHours } from 'date-fns';
 import SalesChart from './SalesChart';
 import WasteChart from './WasteChart';
 import { TrendingUp, Trash2, Users, Lightbulb } from 'lucide-react';
+import { getUserByIdentifier, listAllOrdersForIntelligence, listWastedConsumptions } from '@/lib/db';
 
 export default async function IntelligenceDashboard() {
   const cookieStore = await cookies();
@@ -16,7 +16,13 @@ export default async function IntelligenceDashboard() {
   let user;
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    user = await prisma.user.findFirst({ where: { email: decodedClaims.email } });
+    const identifier = decodedClaims.email || decodedClaims.phone_number;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        user = userResult.data.users[0];
+      }
+    }
   } catch {
     redirect('/admin/login');
   }
@@ -25,19 +31,25 @@ export default async function IntelligenceDashboard() {
     redirect('/admin/dashboard');
   }
 
+  // Fetch data via Data Connect
+  const [ordersRes, wasteRes] = await Promise.all([
+    listAllOrdersForIntelligence(),
+    listWastedConsumptions()
+  ]);
+
+  const allOrders = ordersRes.data.orders;
+  const consumptions = wasteRes.data.materialConsumptions;
+
   // 1. Sales Data (Last 30 days)
   const thirtyDaysAgo = subDays(new Date(), 30);
-  const recentOrders = await prisma.order.findMany({
-    where: { 
-      createdAt: { gte: thirtyDaysAgo },
-      status: { notIn: ['CANCELLED', 'AWAITING_PAYMENT', 'AWAITING_QUOTATION'] }
-    },
-    select: { createdAt: true, totalAmount: true }
-  });
+  const recentOrders = allOrders.filter((o: any) => 
+    new Date(o.createdAt) >= thirtyDaysAgo && 
+    !['CANCELLED', 'AWAITING_PAYMENT', 'AWAITING_QUOTATION'].includes(o.status)
+  );
 
   // Group by day for the chart
-  const salesByDay = recentOrders.reduce((acc: any, order) => {
-    const dateStr = format(order.createdAt, 'MMM dd');
+  const salesByDay = recentOrders.reduce((acc: any, order: any) => {
+    const dateStr = format(new Date(order.createdAt), 'MMM dd');
     if (!acc[dateStr]) acc[dateStr] = 0;
     acc[dateStr] += order.totalAmount;
     return acc;
@@ -45,12 +57,8 @@ export default async function IntelligenceDashboard() {
   const salesData = Object.keys(salesByDay).map(date => ({ date, revenue: salesByDay[date] }));
 
   // 2. Waste Data (Top wasted materials)
-  const consumptions = await prisma.materialConsumption.findMany({
-    where: { wastage: { gt: 0 } },
-    include: { inventoryItem: true }
-  });
-  const wasteByMaterial = consumptions.reduce((acc: any, c) => {
-    const name = c.inventoryItem.name;
+  const wasteByMaterial = consumptions.reduce((acc: any, c: any) => {
+    const name = c.inventoryItem?.name || 'Unknown';
     if (!acc[name]) acc[name] = 0;
     acc[name] += c.wastage;
     return acc;
@@ -61,27 +69,24 @@ export default async function IntelligenceDashboard() {
     .slice(0, 5); // Top 5
 
   // 3. Customer Segmentation (Top Spenders)
-  const topSpenders = await prisma.order.groupBy({
-    by: ['userId'],
-    _sum: { totalAmount: true },
-    having: { totalAmount: { _sum: { gt: 0 } } },
-    orderBy: { _sum: { totalAmount: 'desc' } },
-    take: 5
-  });
-
-  const topUsers = await Promise.all(topSpenders.map(async (ts) => {
-    const u = await prisma.user.findUnique({ where: { id: ts.userId }, select: { name: true, phone: true } });
-    return { name: u?.name || u?.phone, spend: ts._sum.totalAmount || 0 };
-  }));
+  const spendByUser = allOrders.reduce((acc: any, order: any) => {
+    if (!order.user) return acc;
+    const uid = order.user.id;
+    if (!acc[uid]) acc[uid] = { name: order.user.name || order.user.phone || order.user.email, spend: 0 };
+    acc[uid].spend += order.totalAmount;
+    return acc;
+  }, {});
+  
+  const topUsers = Object.values(spendByUser)
+    .sort((a: any, b: any) => b.spend - a.spend)
+    .slice(0, 5) as { name: string, spend: number }[];
 
   // 4. Predictive Insights (Quiet Periods)
-  // Simple heuristic: Count orders by hour of the week over the last 30 days
   const hourCounts = new Array(24).fill(0);
-  recentOrders.forEach(order => {
-    hourCounts[getHours(order.createdAt)]++;
+  recentOrders.forEach((order: any) => {
+    hourCounts[getHours(new Date(order.createdAt))]++;
   });
   
-  // Find the quietest hour during typical business hours (9 AM - 5 PM)
   let quietestHour = 9;
   let minCount = Infinity;
   for (let i = 9; i <= 17; i++) {
@@ -93,19 +98,16 @@ export default async function IntelligenceDashboard() {
   const quietInsight = `Based on the last 30 days, the quietest hour of the day is ${quietestHour}:00. Consider running machine maintenance or scheduling lunch breaks during this time.`;
   
   // 5. Worker Performance
-  const completedOrders = await prisma.order.findMany({
-    where: { status: 'COMPLETED' },
-    include: { consumptions: true } // who did the work
-  });
+  const completedOrders = allOrders.filter((o: any) => o.status === 'COMPLETED');
   
   const workerStats: Record<string, { name: string, jobs: number }> = {};
   for (const order of completedOrders) {
-    if (order.consumptions.length > 0) {
-      const workerId = order.consumptions[0].workerId;
+    if (order.materialConsumptions_on_order && order.materialConsumptions_on_order.length > 0) {
+      const workerId = order.materialConsumptions_on_order[0]?.workerId;
       if (workerId) {
         if (!workerStats[workerId]) {
-          const w = await prisma.user.findUnique({ where: { id: workerId }, select: { name: true, email: true } });
-          workerStats[workerId] = { name: w?.name || w?.email || 'Unknown', jobs: 0 };
+          // Optimization: just use worker ID for now to avoid n+1 queries
+          workerStats[workerId] = { name: `Worker ${workerId.slice(0, 4)}`, jobs: 0 };
         }
         workerStats[workerId].jobs++;
       }

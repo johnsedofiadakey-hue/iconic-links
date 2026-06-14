@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers';
-import prisma from '@/lib/prisma';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
 import OrgAddForm from './OrgAddForm';
 import UserLinker from './UserLinker';
 import { Building2 } from 'lucide-react';
+import { getUserByIdentifier, listOrganizationsWithUsers, listUsersByRole } from '@/lib/db';
 
 export default async function OrganizationsDashboard() {
   const cookieStore = await cookies();
@@ -15,22 +15,24 @@ export default async function OrganizationsDashboard() {
   let adminUser;
   try {
     const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    adminUser = await prisma.user.findFirst({ where: { email: decodedClaims.email } });
+    const identifier = decodedClaims.email || decodedClaims.phone_number;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        adminUser = userResult.data.users[0];
+      }
+    }
   } catch {
     redirect('/admin/login');
   }
 
   if (!adminUser || adminUser.role === 'CUSTOMER') redirect('/admin/dashboard');
 
-  const organizations = await prisma.organization.findMany({
-    include: { users: true },
-    orderBy: { name: 'asc' }
-  });
+  const orgResult = await listOrganizationsWithUsers();
+  const organizations = orgResult.data.organizations;
 
-  const allUsers = await prisma.user.findMany({
-    where: { role: 'CUSTOMER' },
-    orderBy: { createdAt: 'desc' }
-  });
+  const usersResult = await listUsersByRole({ role: 'CUSTOMER' });
+  const allUsers = usersResult.data.users;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -56,19 +58,19 @@ export default async function OrganizationsDashboard() {
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
             <ul className="divide-y divide-gray-200">
-              {organizations.map(org => (
+              {organizations.map((org: any) => (
                 <li key={org.id} className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold text-gray-900">{org.name}</h3>
                     <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-medium">
-                      {org.users.length} Linked Users
+                      {org.users_on_organization?.length || 0} Linked Users
                     </span>
                   </div>
                   
-                  {org.users.length > 0 ? (
+                  {org.users_on_organization && org.users_on_organization.length > 0 ? (
                     <div className="bg-gray-50 rounded border border-gray-100 p-3">
                       <ul className="space-y-2">
-                        {org.users.map(u => (
+                        {org.users_on_organization.map((u: any) => (
                           <li key={u.id} className="text-sm flex justify-between">
                             <span className="font-medium text-gray-800">{u.name || 'Unnamed'}</span>
                             <span className="text-gray-500">{u.phone || u.email}</span>

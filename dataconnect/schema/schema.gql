@@ -1,0 +1,148 @@
+type Organization @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type User @table {
+  id: UUID! @default(expr: "uuidV4()")
+  phone: String @unique
+  email: String @unique
+  name: String
+  password: String
+  role: String! @default(value: "CUSTOMER") # Enum mapping: SUPER_ADMIN, MANAGER, CUSTOMER_SERVICE, PRODUCTION_WORKER, QC_OFFICER, DELIVERY_DRIVER, CUSTOMER
+  organization: Organization
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type CustomerProfile @table {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User! @unique
+  address: String
+  loyaltyPts: Int! @default(value: 0)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Branch @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  location: String!
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type StaffProfile @table {
+  id: UUID! @default(expr: "uuidV4()")
+  user: User! @unique
+  branch: Branch
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Category @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  imageUrl: String
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Service @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  description: String
+  category: Category!
+  pricingType: String! @default(value: "INSTANT") # INSTANT, QUOTE_REQUIRED
+  basePrice: Float
+  imageUrl: String
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Order @table {
+  id: UUID! @default(expr: "uuidV4()")
+  orderNumber: String! @unique
+  user: User!
+  status: String! @default(value: "AWAITING_PAYMENT") # AWAITING_QUOTATION, AWAITING_PAYMENT, PREFLIGHT, DESIGN_IN_PROGRESS, AWAITING_APPROVAL, PRINTING, FINISHING, QC_REJECTED, READY_FOR_PICKUP, OUT_FOR_DELIVERY, COMPLETED, CANCELLED
+  totalAmount: Float! @default(value: 0)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type OrderItem @table {
+  id: UUID! @default(expr: "uuidV4()")
+  order: Order!
+  service: Service!
+  quantity: Int! @default(value: 1)
+  price: Float!
+  specs: Any # JSON
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type File @table {
+  id: UUID! @default(expr: "uuidV4()")
+  url: String!
+  fileName: String!
+  fileType: String!
+  fileSize: Int!
+  uploader: User!
+  orderItem: OrderItem
+  createdAt: Timestamp! @default(expr: "request.time")
+}
+
+type Payment @table {
+  id: UUID! @default(expr: "uuidV4()")
+  order: Order!
+  amount: Float!
+  reference: String! @unique
+  paystackRef: String @unique
+  status: String! @default(value: "PENDING") # PENDING, SUCCESS, FAILED
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type Proof @table {
+  id: UUID! @default(expr: "uuidV4()")
+  order: Order!
+  fileUrl: String!
+  version: Int! @default(value: 1)
+  status: String! @default(value: "PENDING") # PENDING, APPROVED, REJECTED
+  comments: String
+  approvedBy: String # User ID string
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type InventoryItem @table {
+  id: UUID! @default(expr: "uuidV4()")
+  name: String!
+  unitType: String!
+  quantity: Float! @default(value: 0)
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
+
+type MaterialConsumption @table {
+  id: UUID! @default(expr: "uuidV4()")
+  inventoryItem: InventoryItem!
+  order: Order!
+  quantityUsed: Float!
+  wastage: Float! @default(value: 0)
+  worker: User
+  createdAt: Timestamp! @default(expr: "request.time")
+}
+
+type Delivery @table {
+  id: UUID! @default(expr: "uuidV4()")
+  order: Order! @unique
+  address: String!
+  status: String! @default(value: "PENDING") # PENDING, DISPATCHED, DELIVERED, FAILED
+  driver: User
+  proofUrl: String
+  createdAt: Timestamp! @default(expr: "request.time")
+  updatedAt: Timestamp! @default(expr: "request.time")
+}
