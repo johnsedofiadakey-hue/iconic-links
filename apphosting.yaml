@@ -1,0 +1,30 @@
+# Firebase App Hosting Configuration
+# https://firebase.google.com/docs/app-hosting
+
+# The base environment variables available during build and run time
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyBowdMfScrajlvbQ3_LqJXpqGbsaG40Ckk"
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "iconic-links.firebaseapp.com"
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "iconic-links"
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: "iconic-links.firebasestorage.app"
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "867641799137"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:867641799137:web:df190a551d9037970762a0"
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: "G-5R66D21C5R"
+
+# Secrets required for the backend to function
+# You will need to create these secrets in Google Cloud Secret Manager
+# or via the Firebase Console when linking the repository.
+secrets:
+  - variable: DATABASE_URL
+    secret: DATABASE_URL
+  - variable: FIREBASE_PRIVATE_KEY
+    secret: FIREBASE_PRIVATE_KEY
+  - variable: FIREBASE_CLIENT_EMAIL
+    secret: FIREBASE_CLIENT_EMAIL
