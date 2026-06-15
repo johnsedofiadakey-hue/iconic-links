@@ -10,6 +10,11 @@ export type DateString = string;
 
 
 
+export interface AuditLog_Key {
+  id: UUIDString;
+  __typename?: 'AuditLog_Key';
+}
+
 export interface Branch_Key {
   id: UUIDString;
   __typename?: 'Branch_Key';
@@ -18,6 +23,19 @@ export interface Branch_Key {
 export interface Category_Key {
   id: UUIDString;
   __typename?: 'Category_Key';
+}
+
+export interface CreateAuditLogData {
+  auditLog_insert: AuditLog_Key;
+}
+
+export interface CreateAuditLogVariables {
+  action: string;
+  userId: string;
+  orderId?: string | null;
+  previousValue?: unknown | null;
+  newValue?: unknown | null;
+  notes?: string | null;
 }
 
 export interface CreateCategoryData {
@@ -883,6 +901,18 @@ export const updatePaymentStatusRef: UpdatePaymentStatusRef;
 
 export function updatePaymentStatus(vars: UpdatePaymentStatusVariables): MutationPromise<UpdatePaymentStatusData, UpdatePaymentStatusVariables>;
 export function updatePaymentStatus(dc: DataConnect, vars: UpdatePaymentStatusVariables): MutationPromise<UpdatePaymentStatusData, UpdatePaymentStatusVariables>;
+
+interface CreateAuditLogRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: CreateAuditLogVariables): MutationRef<CreateAuditLogData, CreateAuditLogVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: CreateAuditLogVariables): MutationRef<CreateAuditLogData, CreateAuditLogVariables>;
+  operationName: string;
+}
+export const createAuditLogRef: CreateAuditLogRef;
+
+export function createAuditLog(vars: CreateAuditLogVariables): MutationPromise<CreateAuditLogData, CreateAuditLogVariables>;
+export function createAuditLog(dc: DataConnect, vars: CreateAuditLogVariables): MutationPromise<CreateAuditLogData, CreateAuditLogVariables>;
 
 interface GetUserByIdRef {
   /* Allow users to create refs without passing in DataConnect */

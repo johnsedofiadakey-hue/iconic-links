@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { createDeliverySchema } from '@/lib/validations';
 import { DELIVERY_STATUS, ORDER_STATUS } from '@/lib/constants';
-import { createDelivery as dcCreateDelivery, updateDelivery as dcUpdateDelivery, updateOrderStatus, getDelivery } from '@/lib/db';
+import { createDelivery as dcCreateDelivery, updateDelivery as dcUpdateDelivery, updateOrderStatus, getDelivery, logAudit } from '@/lib/db';
 
 export async function createDelivery(orderId: string, address: string) {
   try {
@@ -17,6 +17,13 @@ export async function createDelivery(orderId: string, address: string) {
     await updateOrderStatus({
       id: validatedData.orderId,
       status: ORDER_STATUS.OUT_FOR_DELIVERY
+    });
+
+    await logAudit({
+      action: 'DELIVERY_CREATED',
+      userId: 'SYSTEM', // Assuming systemic creation or we could pass the user
+      orderId: validatedData.orderId,
+      newValue: { address: validatedData.address, status: ORDER_STATUS.OUT_FOR_DELIVERY }
     });
 
     revalidatePath('/admin/dashboard');
@@ -35,6 +42,13 @@ export async function assignDriver(deliveryId: string, driverId: string) {
       driverId,
       status: DELIVERY_STATUS.DISPATCHED
     });
+
+    await logAudit({
+      action: 'DRIVER_ASSIGNED',
+      userId: 'SYSTEM', // Ideally pass manager ID
+      newValue: { deliveryId, driverId, status: DELIVERY_STATUS.DISPATCHED }
+    });
+
     revalidatePath('/admin/delivery');
     return { success: true };
   } catch (error: any) {
@@ -55,6 +69,13 @@ export async function markDelivered(deliveryId: string) {
       await updateOrderStatus({
         id: orderId,
         status: ORDER_STATUS.COMPLETED
+      });
+
+      await logAudit({
+        action: 'ORDER_DELIVERED',
+        userId: 'SYSTEM', // Ideally driver ID
+        orderId: orderId,
+        newValue: { status: ORDER_STATUS.COMPLETED, deliveryId }
       });
     }
 

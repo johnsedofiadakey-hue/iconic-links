@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
+import { rateLimiter, RATE_LIMITS } from '@/lib/ratelimit';
+import { logger } from '@/lib/logger';
 import { getUserByIdentifier, createUser, createStaffProfile, createCustomerProfile } from '@/lib/db';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 5 attempts per 15 minutes per IP
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    if (rateLimiter.isLimited(ip, RATE_LIMITS.AUTH.limit, RATE_LIMITS.AUTH.windowMs)) {
+      logger.warn('Auth rate limit exceeded', { ip });
+      return NextResponse.json({ error: 'Too many login attempts. Please try again later.' }, { status: 429 });
+    }
+
     const { idToken } = await request.json();
     
     // Verify the ID token and create a session cookie
@@ -26,12 +36,23 @@ export async function POST(request: Request) {
 
     if (!users || users.length === 0) {
       if (decodedToken.email) {
+        // Check if there's any super admin
+        const { listUsersByRole } = await import('@/lib/db');
+        const adminResult = await listUsersByRole({ role: 'SUPER_ADMIN' });
+        const hasSuperAdmin = adminResult.data.users.length > 0;
+        const assignedRole = hasSuperAdmin ? 'CUSTOMER' : 'SUPER_ADMIN';
+
         const newUserResult = await createUser({
           email: decodedToken.email,
-          role: 'MANAGER', // Or superadmin based on your logic, default Manager for staff
+          role: assignedRole,
         });
         const newUserId = newUserResult.data.user_insert.id;
-        await createStaffProfile({ userId: newUserId });
+        
+        if (assignedRole === 'SUPER_ADMIN') {
+          await createStaffProfile({ userId: newUserId });
+        } else {
+          await createCustomerProfile({ userId: newUserId });
+        }
       } else if (decodedToken.phone_number) {
         const newUserResult = await createUser({
           phone: decodedToken.phone_number,

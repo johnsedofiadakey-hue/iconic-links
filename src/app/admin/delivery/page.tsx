@@ -1,3 +1,4 @@
+import { hasPermission } from '@/lib/rbac';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
@@ -25,7 +26,9 @@ export default async function DeliveryDashboard() {
     redirect('/admin/login');
   }
 
-  if (!user || user.role === 'CUSTOMER') redirect('/admin/dashboard');
+  if (!user || !hasPermission(user.role, 'DELIVERY')) {
+    redirect('/admin/dashboard');
+  }
 
   const deliveriesResult = await listActiveDeliveries();
   const deliveries = deliveriesResult.data.deliveries;

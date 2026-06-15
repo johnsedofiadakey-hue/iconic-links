@@ -24,7 +24,7 @@ export default function OrderActionsPanel({ order }: { order: any }) {
       const res = await uploadProof(order.id, url);
       
       if (res.success) {
-        toast.error('Proof uploaded and sent to customer!');
+        toast.success('Proof uploaded and sent to customer!');
       } else {
         toast.error(res.error);
       }

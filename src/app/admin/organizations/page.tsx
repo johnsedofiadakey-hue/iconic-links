@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
+import { hasPermission } from '@/lib/rbac';
 import OrgAddForm from './OrgAddForm';
 import UserLinker from './UserLinker';
 import { Building2 } from 'lucide-react';
@@ -26,7 +27,7 @@ export default async function OrganizationsDashboard() {
     redirect('/admin/login');
   }
 
-  if (!adminUser || adminUser.role === 'CUSTOMER') redirect('/admin/dashboard');
+  if (!adminUser || !hasPermission(adminUser.role, 'ORGANIZATIONS')) redirect('/admin/dashboard');
 
   const orgResult = await listOrganizationsWithUsers();
   const organizations = orgResult.data.organizations;

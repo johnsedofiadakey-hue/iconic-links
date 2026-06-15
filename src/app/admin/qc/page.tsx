@@ -1,3 +1,4 @@
+import { hasPermission } from '@/lib/rbac';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
@@ -26,7 +27,9 @@ export default async function QCDashboard() {
     redirect('/admin/login');
   }
 
-  if (!user || user.role === 'CUSTOMER') redirect('/admin/login');
+  if (!user || !hasPermission(user.role, 'QC')) {
+    redirect('/admin/dashboard');
+  }
 
   // QC Officer mostly cares about things that have finished printing/finishing
   const ordersResult = await listOrdersForQc();

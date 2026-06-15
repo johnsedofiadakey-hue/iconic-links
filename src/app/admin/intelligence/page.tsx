@@ -1,3 +1,4 @@
+import { hasPermission } from '@/lib/rbac';
 import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { redirect } from 'next/navigation';
@@ -27,7 +28,7 @@ export default async function IntelligenceDashboard() {
     redirect('/admin/login');
   }
 
-  if (!user || (user.role !== 'SUPER_ADMIN' && user.role !== 'MANAGER')) {
+  if (!user || !hasPermission(user.role, 'INTELLIGENCE')) {
     redirect('/admin/dashboard');
   }
 

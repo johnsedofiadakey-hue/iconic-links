@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ROLES } from '@/lib/rbac';
 import { getUserByIdentifier, listRecentOrders } from '@/lib/db';
 
 export default async function AdminDashboard() {
@@ -24,7 +25,9 @@ export default async function AdminDashboard() {
     redirect('/admin/login');
   }
 
-  if (!user || user.role === 'CUSTOMER') redirect('/admin/login');
+  // Only allow staff roles to access admin dashboard
+  const staffRoles = [ROLES.SUPER_ADMIN, ROLES.MANAGER, ROLES.CUSTOMER_SERVICE, ROLES.PRODUCTION_WORKER, ROLES.QC_OFFICER, ROLES.DELIVERY_DRIVER];
+  if (!user || !staffRoles.includes(user.role as any)) redirect('/admin/login');
 
   const ordersResult = await listRecentOrders();
   const orders = ordersResult.data.orders;

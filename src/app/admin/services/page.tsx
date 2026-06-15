@@ -1,9 +1,35 @@
+import { cookies } from 'next/headers';
+import { adminAuth } from '@/lib/firebase/admin';
+import { redirect } from 'next/navigation';
+import { hasPermission } from '@/lib/rbac';
 import { getCategories, createCategory, createService } from '@/app/actions/catalog';
+import { getUserByIdentifier } from '@/lib/db';
 import { PlusCircle } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ServicesPage() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('session')?.value;
+
+  if (!sessionCookie) redirect('/admin/login');
+
+  let user;
+  try {
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+    const identifier = decodedClaims.email || decodedClaims.phone_number;
+    if (identifier) {
+      const userResult = await getUserByIdentifier({ identifier });
+      if (userResult.data.users.length > 0) {
+        user = userResult.data.users[0];
+      }
+    }
+  } catch {
+    redirect('/admin/login');
+  }
+
+  if (!user || !hasPermission(user.role, 'SERVICES')) redirect('/admin/dashboard');
+
   const categories = await getCategories();
 
   return (

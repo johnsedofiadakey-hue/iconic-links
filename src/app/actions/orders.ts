@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { adminAuth } from '@/lib/firebase/admin';
 import { createOrderSchema } from '@/lib/validations';
 import { ORDER_STATUS } from '@/lib/constants';
-import { getUserByIdentifier, createOrder as dcCreateOrder, createOrderItem } from '@/lib/db';
+import { getUserByIdentifier, createOrder as dcCreateOrder, createOrderItem, logAudit } from '@/lib/db';
 
 export async function createOrder(data: {
   serviceId: string;
@@ -59,6 +59,13 @@ export async function createOrder(data: {
       quantity: validatedData.quantity,
       price: validatedData.isInstant ? (validatedData.basePrice || 0) : 0,
       specs: validatedData.specs
+    });
+
+    await logAudit({
+      action: 'ORDER_CREATED',
+      userId: user.id,
+      orderId: orderId,
+      newValue: { orderNumber, totalAmount, status: initialStatus }
     });
 
     return { success: true, order: { id: orderId, orderNumber, status: initialStatus, totalAmount } };
