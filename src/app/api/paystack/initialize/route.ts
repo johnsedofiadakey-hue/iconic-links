@@ -4,13 +4,17 @@ import { getOrder, createPayment } from '@/lib/db';
 
 export async function POST(request: Request) {
   try {
-    const { orderId, email, amount } = await request.json();
+    const { orderId, amount } = await request.json();
 
     const orderResult = await getOrder({ id: orderId });
     const order = orderResult.data.order;
     if (!order || order.status !== 'AWAITING_PAYMENT') {
       return NextResponse.json({ error: 'Invalid order or order is not awaiting payment' }, { status: 400 });
     }
+
+    // Derive a real, order-specific email server-side rather than trusting client input.
+    // Most customers sign up via phone OTP only and have no email on file.
+    const email = order.user?.email || `${(order.user?.phone || 'customer').replace(/[^0-9]/g, '')}@iconiclinks.customer`;
 
     // Amount in Paystack is in kobo (multiply by 100)
     const amountInKobo = Math.round(amount * 100);
@@ -34,7 +38,7 @@ export async function POST(request: Request) {
         email,
         amount: amountInKobo,
         reference,
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`, // Redirect back to customer dashboard
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard`, // Redirect back to customer dashboard
         metadata: {
           orderId: order.id
         }

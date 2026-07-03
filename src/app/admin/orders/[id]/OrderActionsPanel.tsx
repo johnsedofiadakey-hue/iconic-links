@@ -1,16 +1,20 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { uploadProof } from '@/app/actions/proofs';
 import { createDelivery } from '@/app/actions/delivery';
-import { UploadCloud, Loader2, QrCode, Truck } from 'lucide-react';
+import { setQuotePrice } from '@/app/actions/orders';
+import { UploadCloud, Loader2, QrCode, Truck, Send } from 'lucide-react';
 import { uploadFile } from '@/lib/firebase/storage';
 import { toast } from 'sonner';
 
 export default function OrderActionsPanel({ order }: { order: any }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [itemPrices, setItemPrices] = useState<Record<string, string>>({});
 
   const handleUploadProof = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,9 +55,67 @@ export default function OrderActionsPanel({ order }: { order: any }) {
     }
   };
 
+  const handleSubmitQuote = async () => {
+    const items = (order.orderItems_on_order || []).map((item: any) => ({
+      orderItemId: item.id,
+      price: Number(itemPrices[item.id]),
+    }));
+
+    const invalid = items.find((i: any) => !Number.isFinite(i.price) || i.price <= 0);
+    if (invalid || items.length === 0) {
+      toast.error('Please enter a valid price for every item.');
+      return;
+    }
+
+    setLoading(true);
+    const res = await setQuotePrice({ orderId: order.id, items });
+    setLoading(false);
+
+    if (res.success) {
+      toast.success('Quote sent to customer. They can now pay from their dashboard.');
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Failed to submit quote.');
+    }
+  };
+
   return (
     <div className="space-y-6">
-      
+
+      {/* Quote Pricing Section */}
+      {order.status === 'AWAITING_QUOTATION' && (
+        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+          <h3 className="text-sm font-bold text-gray-900 mb-2">Set Quote Price</h3>
+          <p className="text-xs text-gray-500 mb-3">Enter a unit price for each line item. The customer will be able to pay once you send the quote.</p>
+
+          <div className="space-y-3 mb-3">
+            {(order.orderItems_on_order || []).map((item: any) => (
+              <div key={item.id} className="flex items-center justify-between">
+                <span className="text-sm text-gray-700">{item.service?.name} (x{item.quantity})</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  className="w-28 text-sm p-1.5 border rounded bg-white"
+                  placeholder="GHS 0.00"
+                  value={itemPrices[item.id] ?? ''}
+                  onChange={e => setItemPrices({ ...itemPrices, [item.id]: e.target.value })}
+                  disabled={loading}
+                />
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleSubmitQuote}
+            disabled={loading}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-medium flex justify-center items-center transition disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Send className="w-4 h-4 mr-2" /> Send Quote to Customer</>}
+          </button>
+        </div>
+      )}
+
       {/* Proof Uploading Section */}
       {['PREFLIGHT', 'DESIGN_IN_PROGRESS', 'AWAITING_PAYMENT'].includes(order.status) && (
         <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">

@@ -49,6 +49,34 @@ exports.updateOrderStatus = function updateOrderStatus(dcOrVars, vars) {
 }
 ;
 
+const setOrderQuoteRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'SetOrderQuote', inputVars);
+}
+setOrderQuoteRef.operationName = 'SetOrderQuote';
+exports.setOrderQuoteRef = setOrderQuoteRef;
+
+exports.setOrderQuote = function setOrderQuote(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(setOrderQuoteRef(dcInstance, inputVars));
+}
+;
+
+const updateOrderItemPriceRef = (dcOrVars, vars) => {
+  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
+  dcInstance._useGeneratedSdk();
+  return mutationRef(dcInstance, 'UpdateOrderItemPrice', inputVars);
+}
+updateOrderItemPriceRef.operationName = 'UpdateOrderItemPrice';
+exports.updateOrderItemPriceRef = updateOrderItemPriceRef;
+
+exports.updateOrderItemPrice = function updateOrderItemPrice(dcOrVars, vars) {
+  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
+  return executeMutation(updateOrderItemPriceRef(dcInstance, inputVars));
+}
+;
+
 const createCategoryRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -298,7 +326,7 @@ exports.getUserByIdRef = getUserByIdRef;
 exports.getUserById = function getUserById(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getUserByIdRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getUserByIdRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -313,7 +341,7 @@ exports.listCategoriesRef = listCategoriesRef;
 exports.listCategories = function listCategories(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listCategoriesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listCategoriesRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -328,7 +356,7 @@ exports.getCategoryServicesRef = getCategoryServicesRef;
 exports.getCategoryServices = function getCategoryServices(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getCategoryServicesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getCategoryServicesRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -343,7 +371,7 @@ exports.getOrderRef = getOrderRef;
 exports.getOrder = function getOrder(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getOrderRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getOrderRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -358,7 +386,7 @@ exports.listOrdersByUserRef = listOrdersByUserRef;
 exports.listOrdersByUser = function listOrdersByUser(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(listOrdersByUserRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listOrdersByUserRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -373,7 +401,7 @@ exports.listInventoryItemsRef = listInventoryItemsRef;
 exports.listInventoryItems = function listInventoryItems(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listInventoryItemsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listInventoryItemsRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -388,7 +416,7 @@ exports.getInventoryItemRef = getInventoryItemRef;
 exports.getInventoryItem = function getInventoryItem(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getInventoryItemRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getInventoryItemRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -403,7 +431,7 @@ exports.getUserByIdentifierRef = getUserByIdentifierRef;
 exports.getUserByIdentifier = function getUserByIdentifier(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getUserByIdentifierRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getUserByIdentifierRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -418,7 +446,7 @@ exports.getDeliveryRef = getDeliveryRef;
 exports.getDelivery = function getDelivery(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getDeliveryRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getDeliveryRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -433,7 +461,7 @@ exports.getOrderProofsRef = getOrderProofsRef;
 exports.getOrderProofs = function getOrderProofs(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getOrderProofsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getOrderProofsRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -448,7 +476,7 @@ exports.getProofRef = getProofRef;
 exports.getProof = function getProof(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getProofRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getProofRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -463,7 +491,7 @@ exports.listRecentOrdersRef = listRecentOrdersRef;
 exports.listRecentOrders = function listRecentOrders(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listRecentOrdersRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listRecentOrdersRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -478,7 +506,7 @@ exports.listActiveDeliveriesRef = listActiveDeliveriesRef;
 exports.listActiveDeliveries = function listActiveDeliveries(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listActiveDeliveriesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listActiveDeliveriesRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -493,7 +521,7 @@ exports.listUsersByRoleRef = listUsersByRoleRef;
 exports.listUsersByRole = function listUsersByRole(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(listUsersByRoleRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listUsersByRoleRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -508,7 +536,7 @@ exports.listAllOrdersForIntelligenceRef = listAllOrdersForIntelligenceRef;
 exports.listAllOrdersForIntelligence = function listAllOrdersForIntelligence(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listAllOrdersForIntelligenceRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listAllOrdersForIntelligenceRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -523,7 +551,7 @@ exports.listWastedConsumptionsRef = listWastedConsumptionsRef;
 exports.listWastedConsumptions = function listWastedConsumptions(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listWastedConsumptionsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listWastedConsumptionsRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -538,7 +566,7 @@ exports.getOrderWithDetailsRef = getOrderWithDetailsRef;
 exports.getOrderWithDetails = function getOrderWithDetails(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getOrderWithDetailsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getOrderWithDetailsRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -553,7 +581,7 @@ exports.listOrdersForQcRef = listOrdersForQcRef;
 exports.listOrdersForQc = function listOrdersForQc(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listOrdersForQcRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listOrdersForQcRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -568,7 +596,7 @@ exports.listOrdersByUserWithDetailsRef = listOrdersByUserWithDetailsRef;
 exports.listOrdersByUserWithDetails = function listOrdersByUserWithDetails(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(listOrdersByUserWithDetailsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listOrdersByUserWithDetailsRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -583,7 +611,7 @@ exports.getWorkerJobRef = getWorkerJobRef;
 exports.getWorkerJob = function getWorkerJob(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getWorkerJobRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getWorkerJobRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -598,7 +626,7 @@ exports.listOrganizationsWithUsersRef = listOrganizationsWithUsersRef;
 exports.listOrganizationsWithUsers = function listOrganizationsWithUsers(dcOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listOrganizationsWithUsersRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(listOrganizationsWithUsersRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -613,7 +641,7 @@ exports.getServiceRef = getServiceRef;
 exports.getService = function getService(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getServiceRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getServiceRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;
 
@@ -628,6 +656,6 @@ exports.getPaymentByReferenceRef = getPaymentByReferenceRef;
 exports.getPaymentByReference = function getPaymentByReference(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
-  return executeQuery(getPaymentByReferenceRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
+  return executeQuery(getPaymentByReferenceRef(dcInstance, inputVars), inputOpts && inputOpts.fetchPolicy);
 }
 ;

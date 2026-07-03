@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Package, Clock } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import ProofReviewPanel from './ProofReviewPanel';
+import PayNowButton from './PayNowButton';
 import { getUserByIdentifier, listOrdersByUserWithDetails } from '@/lib/db';
 
 export default async function CustomerDashboard() {
@@ -55,12 +56,12 @@ export default async function CustomerDashboard() {
             {orders.map((order: any) => (
               <div key={order.id} className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
                 <div className="flex justify-between items-start border-b border-gray-100 pb-4 mb-4">
-                  <div>
+                  <Link href={`/dashboard/${order.id}`} className="group">
                     <span className="text-xs font-bold text-gray-500 tracking-wider">ORDER {order.orderNumber}</span>
-                    <h3 className="font-bold text-lg text-gray-900 mt-1">
+                    <h3 className="font-bold text-lg text-gray-900 mt-1 group-hover:text-blue-600 transition">
                       {order.orderItems_on_order?.[0]?.service?.name} {order.orderItems_on_order?.length > 1 && `+ ${order.orderItems_on_order.length - 1} more`}
                     </h3>
-                  </div>
+                  </Link>
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                     order.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
                     order.status === 'AWAITING_PAYMENT' ? 'bg-red-100 text-red-800' :
@@ -69,7 +70,7 @@ export default async function CustomerDashboard() {
                     {order.status.replace('_', ' ')}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between items-center text-sm">
                   <div className="flex items-center text-gray-500">
                     <Clock className="w-4 h-4 mr-1" />
@@ -79,6 +80,11 @@ export default async function CustomerDashboard() {
                     GHS {order.totalAmount.toFixed(2)}
                   </div>
                 </div>
+
+                {/* Pay Now if quote has been priced and awaiting payment */}
+                {order.status === 'AWAITING_PAYMENT' && (
+                  <PayNowButton orderId={order.id} amount={order.totalAmount} />
+                )}
 
                 {/* Show Proof Review if Awaiting Approval */}
                 {order.status === 'AWAITING_APPROVAL' && order.proofs_on_order && order.proofs_on_order[0] && (

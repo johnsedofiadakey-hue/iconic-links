@@ -47,6 +47,7 @@ query GetOrder($id: UUID!) @auth(level: PUBLIC) {
       id
       name
       phone
+      email
     }
   }
 }
@@ -324,6 +325,7 @@ query GetPaymentByReference($reference: String!) @auth(level: PUBLIC) {
     status
     order {
       status
+      userId
     }
   }
 }

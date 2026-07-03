@@ -10,6 +10,14 @@ mutation UpdateOrderStatus($id: UUID!, $status: String!) @auth(level: PUBLIC) {
   order_update(id: $id, data: { status: $status })
 }
 
+mutation SetOrderQuote($id: UUID!, $totalAmount: Float!, $status: String!) @auth(level: PUBLIC) {
+  order_update(id: $id, data: { totalAmount: $totalAmount, status: $status })
+}
+
+mutation UpdateOrderItemPrice($id: UUID!, $price: Float!) @auth(level: PUBLIC) {
+  orderItem_update(id: $id, data: { price: $price })
+}
+
 mutation CreateCategory($name: String!) @auth(level: PUBLIC) {
   category_insert(data: { name: $name })
 }
@@ -72,4 +80,8 @@ mutation CreatePayment($orderId: UUID!, $amount: Float!, $reference: String!) @a
 
 mutation UpdatePaymentStatus($id: UUID!, $status: String!, $paystackRef: String) @auth(level: PUBLIC) {
   payment_update(id: $id, data: { status: $status, paystackRef: $paystackRef })
+}
+
+mutation CreateAuditLog($action: String!, $userId: String!, $orderId: String, $previousValue: Any, $newValue: Any, $notes: String) @auth(level: PUBLIC) {
+  auditLog_insert(data: { action: $action, userId: $userId, orderId: $orderId, previousValue: $previousValue, newValue: $newValue, notes: $notes })
 }

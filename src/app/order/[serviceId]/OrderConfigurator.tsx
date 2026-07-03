@@ -22,11 +22,20 @@ export default function OrderConfigurator({ service }: OrderConfiguratorProps) {
   const isInstant = service.pricingType === 'INSTANT';
   const estimatedPrice = isInstant ? (service.basePrice || 0) * quantity : null;
 
+  const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error('File is too large. Maximum size is 100MB.');
+        e.target.value = '';
+        return;
+      }
+
       setFiles([...files, file]);
-      
+
       setIsUploading(true);
       setUploadProgress(0);
       try {
@@ -78,7 +87,6 @@ export default function OrderConfigurator({ service }: OrderConfiguratorProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: response.order.id,
-            email: 'customer@placeholder.com', // Get from user session in real app
             amount: response.order.totalAmount
           })
         });
@@ -143,7 +151,7 @@ export default function OrderConfigurator({ service }: OrderConfiguratorProps) {
             <div className="flex text-sm text-gray-600 justify-center">
               <label htmlFor="file-upload" className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
                 <span>{isUploading ? `Uploading ${uploadProgress.toFixed(0)}%...` : 'Upload files'}</span>
-                <input id="file-upload" name="file-upload" type="file" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
+                <input id="file-upload" name="file-upload" type="file" accept=".pdf,.jpg,.jpeg,.png,.tiff" className="sr-only" onChange={handleFileChange} disabled={isUploading} />
               </label>
             </div>
             <p className="text-xs text-gray-500 mt-2">PDF, PNG, JPG, AI up to 100MB</p>

@@ -26,3 +26,11 @@ export const createDeliverySchema = z.object({
   orderId: z.string().min(1, 'Order ID is required'),
   address: z.string().min(5, 'Delivery address must be at least 5 characters'),
 });
+
+export const setQuoteSchema = z.object({
+  orderId: z.string().min(1, 'Order ID is required'),
+  items: z.array(z.object({
+    orderItemId: z.string().min(1, 'Order item ID is required'),
+    price: z.number().positive('Price must be greater than zero').max(1000000, 'Price exceeds allowed maximum'),
+  })).min(1, 'At least one item price is required'),
+});

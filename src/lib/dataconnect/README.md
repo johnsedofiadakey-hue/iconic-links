@@ -35,6 +35,8 @@ This README will guide you through the process of using the generated JavaScript
   - [*CreateUser*](#createuser)
   - [*CreateOrder*](#createorder)
   - [*UpdateOrderStatus*](#updateorderstatus)
+  - [*SetOrderQuote*](#setorderquote)
+  - [*UpdateOrderItemPrice*](#updateorderitemprice)
   - [*CreateCategory*](#createcategory)
   - [*CreateService*](#createservice)
   - [*UpdateInventoryQuantity*](#updateinventoryquantity)
@@ -486,6 +488,7 @@ export interface GetOrderData {
       id: UUIDString;
       name?: string | null;
       phone?: string | null;
+      email?: string | null;
     } & User_Key;
   } & Order_Key;
 }
@@ -1382,14 +1385,14 @@ export interface ListRecentOrdersData {
       email?: string | null;
       phone?: string | null;
     } & User_Key;
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      price: number;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        price: number;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -1706,9 +1709,9 @@ export interface ListAllOrdersForIntelligenceData {
       name?: string | null;
       phone?: string | null;
     } & User_Key;
-    materialConsumptions_on_order: ({
-      workerId?: UUIDString | null;
-    })[];
+      materialConsumptions_on_order: ({
+        workerId?: UUIDString | null;
+      })[];
   } & Order_Key)[];
 }
 ```
@@ -1913,26 +1916,26 @@ export interface GetOrderWithDetailsData {
       phone?: string | null;
       email?: string | null;
     };
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      price: number;
-      specs?: unknown | null;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
-    proofs_on_order: ({
-      id: UUIDString;
-      version: number;
-      status: string;
-      fileUrl: string;
-    } & Proof_Key)[];
-    payments_on_order: ({
-      id: UUIDString;
-      amount: number;
-      status: string;
-    } & Payment_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        price: number;
+        specs?: unknown | null;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
+        proofs_on_order: ({
+          id: UUIDString;
+          version: number;
+          status: string;
+          fileUrl: string;
+        } & Proof_Key)[];
+          payments_on_order: ({
+            id: UUIDString;
+            amount: number;
+            status: string;
+          } & Payment_Key)[];
   } & Order_Key;
 }
 ```
@@ -2044,13 +2047,13 @@ export interface ListOrdersForQcData {
       name?: string | null;
       phone?: string | null;
     };
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -2160,17 +2163,17 @@ export interface ListOrdersByUserWithDetailsData {
         name: string;
       };
     } & OrderItem_Key)[];
-    payments_on_order: ({
-      id: UUIDString;
-      status: string;
-    } & Payment_Key)[];
-    proofs_on_order: ({
-      id: UUIDString;
-      version: number;
-      status: string;
-      fileUrl: string;
-      comments?: string | null;
-    } & Proof_Key)[];
+      payments_on_order: ({
+        id: UUIDString;
+        status: string;
+      } & Payment_Key)[];
+        proofs_on_order: ({
+          id: UUIDString;
+          version: number;
+          status: string;
+          fileUrl: string;
+          comments?: string | null;
+        } & Proof_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -2627,6 +2630,7 @@ export interface GetPaymentByReferenceData {
     status: string;
     order: {
       status: string;
+      userId: UUIDString;
     };
   } & Payment_Key)[];
 }
@@ -3051,6 +3055,233 @@ console.log(data.order_update);
 executeMutation(ref).then((response) => {
   const data = response.data;
   console.log(data.order_update);
+});
+```
+
+## SetOrderQuote
+You can execute the `SetOrderQuote` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+setOrderQuote(vars: SetOrderQuoteVariables): MutationPromise<SetOrderQuoteData, SetOrderQuoteVariables>;
+
+interface SetOrderQuoteRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SetOrderQuoteVariables): MutationRef<SetOrderQuoteData, SetOrderQuoteVariables>;
+}
+export const setOrderQuoteRef: SetOrderQuoteRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+setOrderQuote(dc: DataConnect, vars: SetOrderQuoteVariables): MutationPromise<SetOrderQuoteData, SetOrderQuoteVariables>;
+
+interface SetOrderQuoteRef {
+  ...
+  (dc: DataConnect, vars: SetOrderQuoteVariables): MutationRef<SetOrderQuoteData, SetOrderQuoteVariables>;
+}
+export const setOrderQuoteRef: SetOrderQuoteRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the setOrderQuoteRef:
+```typescript
+const name = setOrderQuoteRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `SetOrderQuote` mutation requires an argument of type `SetOrderQuoteVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface SetOrderQuoteVariables {
+  id: UUIDString;
+  totalAmount: number;
+  status: string;
+}
+```
+### Return Type
+Recall that executing the `SetOrderQuote` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `SetOrderQuoteData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface SetOrderQuoteData {
+  order_update?: Order_Key | null;
+}
+```
+### Using `SetOrderQuote`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, setOrderQuote, SetOrderQuoteVariables } from '@iconic-links/dataconnect';
+
+// The `SetOrderQuote` mutation requires an argument of type `SetOrderQuoteVariables`:
+const setOrderQuoteVars: SetOrderQuoteVariables = {
+  id: ..., 
+  totalAmount: ..., 
+  status: ..., 
+};
+
+// Call the `setOrderQuote()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await setOrderQuote(setOrderQuoteVars);
+// Variables can be defined inline as well.
+const { data } = await setOrderQuote({ id: ..., totalAmount: ..., status: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await setOrderQuote(dataConnect, setOrderQuoteVars);
+
+console.log(data.order_update);
+
+// Or, you can use the `Promise` API.
+setOrderQuote(setOrderQuoteVars).then((response) => {
+  const data = response.data;
+  console.log(data.order_update);
+});
+```
+
+### Using `SetOrderQuote`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, setOrderQuoteRef, SetOrderQuoteVariables } from '@iconic-links/dataconnect';
+
+// The `SetOrderQuote` mutation requires an argument of type `SetOrderQuoteVariables`:
+const setOrderQuoteVars: SetOrderQuoteVariables = {
+  id: ..., 
+  totalAmount: ..., 
+  status: ..., 
+};
+
+// Call the `setOrderQuoteRef()` function to get a reference to the mutation.
+const ref = setOrderQuoteRef(setOrderQuoteVars);
+// Variables can be defined inline as well.
+const ref = setOrderQuoteRef({ id: ..., totalAmount: ..., status: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = setOrderQuoteRef(dataConnect, setOrderQuoteVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.order_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.order_update);
+});
+```
+
+## UpdateOrderItemPrice
+You can execute the `UpdateOrderItemPrice` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+updateOrderItemPrice(vars: UpdateOrderItemPriceVariables): MutationPromise<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+
+interface UpdateOrderItemPriceRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateOrderItemPriceVariables): MutationRef<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+}
+export const updateOrderItemPriceRef: UpdateOrderItemPriceRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateOrderItemPrice(dc: DataConnect, vars: UpdateOrderItemPriceVariables): MutationPromise<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+
+interface UpdateOrderItemPriceRef {
+  ...
+  (dc: DataConnect, vars: UpdateOrderItemPriceVariables): MutationRef<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+}
+export const updateOrderItemPriceRef: UpdateOrderItemPriceRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateOrderItemPriceRef:
+```typescript
+const name = updateOrderItemPriceRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateOrderItemPrice` mutation requires an argument of type `UpdateOrderItemPriceVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateOrderItemPriceVariables {
+  id: UUIDString;
+  price: number;
+}
+```
+### Return Type
+Recall that executing the `UpdateOrderItemPrice` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateOrderItemPriceData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateOrderItemPriceData {
+  orderItem_update?: OrderItem_Key | null;
+}
+```
+### Using `UpdateOrderItemPrice`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateOrderItemPrice, UpdateOrderItemPriceVariables } from '@iconic-links/dataconnect';
+
+// The `UpdateOrderItemPrice` mutation requires an argument of type `UpdateOrderItemPriceVariables`:
+const updateOrderItemPriceVars: UpdateOrderItemPriceVariables = {
+  id: ..., 
+  price: ..., 
+};
+
+// Call the `updateOrderItemPrice()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateOrderItemPrice(updateOrderItemPriceVars);
+// Variables can be defined inline as well.
+const { data } = await updateOrderItemPrice({ id: ..., price: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateOrderItemPrice(dataConnect, updateOrderItemPriceVars);
+
+console.log(data.orderItem_update);
+
+// Or, you can use the `Promise` API.
+updateOrderItemPrice(updateOrderItemPriceVars).then((response) => {
+  const data = response.data;
+  console.log(data.orderItem_update);
+});
+```
+
+### Using `UpdateOrderItemPrice`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateOrderItemPriceRef, UpdateOrderItemPriceVariables } from '@iconic-links/dataconnect';
+
+// The `UpdateOrderItemPrice` mutation requires an argument of type `UpdateOrderItemPriceVariables`:
+const updateOrderItemPriceVars: UpdateOrderItemPriceVariables = {
+  id: ..., 
+  price: ..., 
+};
+
+// Call the `updateOrderItemPriceRef()` function to get a reference to the mutation.
+const ref = updateOrderItemPriceRef(updateOrderItemPriceVars);
+// Variables can be defined inline as well.
+const ref = updateOrderItemPriceRef({ id: ..., price: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateOrderItemPriceRef(dataConnect, updateOrderItemPriceVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.orderItem_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.orderItem_update);
 });
 ```
 

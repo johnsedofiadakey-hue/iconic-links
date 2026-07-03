@@ -1,19 +1,27 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Check, X, Loader2, Eye } from 'lucide-react';
 import { approveProof, rejectProof } from '@/app/actions/proofs';
 import { toast } from 'sonner';
 
 export default function ProofReviewPanel({ proof, userId }: { proof: any, userId: string }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [comments, setComments] = useState('');
 
   const handleApprove = async () => {
     setLoading(true);
-    await approveProof(proof.id, userId);
+    const res = await approveProof(proof.id, userId);
     setLoading(false);
+    if (res.success) {
+      toast.success('Proof approved. Your order has moved to printing.');
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Failed to approve proof.');
+    }
   };
 
   const handleReject = async () => {
@@ -22,9 +30,15 @@ export default function ProofReviewPanel({ proof, userId }: { proof: any, userId
       return;
     }
     setLoading(true);
-    await rejectProof(proof.id, comments);
+    const res = await rejectProof(proof.id, comments);
     setLoading(false);
     setRejecting(false);
+    if (res.success) {
+      toast.success('Feedback submitted. The design team has been notified.');
+      router.refresh();
+    } else {
+      toast.error(res.error || 'Failed to submit feedback.');
+    }
   };
 
   if (proof.status !== 'PENDING') return null;

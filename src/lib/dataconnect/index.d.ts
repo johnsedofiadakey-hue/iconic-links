@@ -220,6 +220,7 @@ export interface GetOrderData {
       id: UUIDString;
       name?: string | null;
       phone?: string | null;
+      email?: string | null;
     } & User_Key;
   } & Order_Key;
 }
@@ -254,26 +255,26 @@ export interface GetOrderWithDetailsData {
       phone?: string | null;
       email?: string | null;
     };
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      price: number;
-      specs?: unknown | null;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
-    proofs_on_order: ({
-      id: UUIDString;
-      version: number;
-      status: string;
-      fileUrl: string;
-    } & Proof_Key)[];
-    payments_on_order: ({
-      id: UUIDString;
-      amount: number;
-      status: string;
-    } & Payment_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        price: number;
+        specs?: unknown | null;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
+        proofs_on_order: ({
+          id: UUIDString;
+          version: number;
+          status: string;
+          fileUrl: string;
+        } & Proof_Key)[];
+          payments_on_order: ({
+            id: UUIDString;
+            amount: number;
+            status: string;
+          } & Payment_Key)[];
   } & Order_Key;
 }
 
@@ -289,6 +290,7 @@ export interface GetPaymentByReferenceData {
     status: string;
     order: {
       status: string;
+      userId: UUIDString;
     };
   } & Payment_Key)[];
 }
@@ -409,9 +411,9 @@ export interface ListAllOrdersForIntelligenceData {
       name?: string | null;
       phone?: string | null;
     } & User_Key;
-    materialConsumptions_on_order: ({
-      workerId?: UUIDString | null;
-    })[];
+      materialConsumptions_on_order: ({
+        workerId?: UUIDString | null;
+      })[];
   } & Order_Key)[];
 }
 
@@ -465,17 +467,17 @@ export interface ListOrdersByUserWithDetailsData {
         name: string;
       };
     } & OrderItem_Key)[];
-    payments_on_order: ({
-      id: UUIDString;
-      status: string;
-    } & Payment_Key)[];
-    proofs_on_order: ({
-      id: UUIDString;
-      version: number;
-      status: string;
-      fileUrl: string;
-      comments?: string | null;
-    } & Proof_Key)[];
+      payments_on_order: ({
+        id: UUIDString;
+        status: string;
+      } & Payment_Key)[];
+        proofs_on_order: ({
+          id: UUIDString;
+          version: number;
+          status: string;
+          fileUrl: string;
+          comments?: string | null;
+        } & Proof_Key)[];
   } & Order_Key)[];
 }
 
@@ -492,13 +494,13 @@ export interface ListOrdersForQcData {
       name?: string | null;
       phone?: string | null;
     };
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 
@@ -527,14 +529,14 @@ export interface ListRecentOrdersData {
       email?: string | null;
       phone?: string | null;
     } & User_Key;
-    orderItems_on_order: ({
-      id: UUIDString;
-      quantity: number;
-      price: number;
-      service: {
-        name: string;
-      };
-    } & OrderItem_Key)[];
+      orderItems_on_order: ({
+        id: UUIDString;
+        quantity: number;
+        price: number;
+        service: {
+          name: string;
+        };
+      } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 
@@ -606,6 +608,16 @@ export interface Service_Key {
   __typename?: 'Service_Key';
 }
 
+export interface SetOrderQuoteData {
+  order_update?: Order_Key | null;
+}
+
+export interface SetOrderQuoteVariables {
+  id: UUIDString;
+  totalAmount: number;
+  status: string;
+}
+
 export interface StaffProfile_Key {
   id: UUIDString;
   __typename?: 'StaffProfile_Key';
@@ -628,6 +640,15 @@ export interface UpdateInventoryQuantityData {
 export interface UpdateInventoryQuantityVariables {
   id: UUIDString;
   quantity: number;
+}
+
+export interface UpdateOrderItemPriceData {
+  orderItem_update?: OrderItem_Key | null;
+}
+
+export interface UpdateOrderItemPriceVariables {
+  id: UUIDString;
+  price: number;
 }
 
 export interface UpdateOrderStatusData {
@@ -709,6 +730,30 @@ export const updateOrderStatusRef: UpdateOrderStatusRef;
 
 export function updateOrderStatus(vars: UpdateOrderStatusVariables): MutationPromise<UpdateOrderStatusData, UpdateOrderStatusVariables>;
 export function updateOrderStatus(dc: DataConnect, vars: UpdateOrderStatusVariables): MutationPromise<UpdateOrderStatusData, UpdateOrderStatusVariables>;
+
+interface SetOrderQuoteRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: SetOrderQuoteVariables): MutationRef<SetOrderQuoteData, SetOrderQuoteVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: SetOrderQuoteVariables): MutationRef<SetOrderQuoteData, SetOrderQuoteVariables>;
+  operationName: string;
+}
+export const setOrderQuoteRef: SetOrderQuoteRef;
+
+export function setOrderQuote(vars: SetOrderQuoteVariables): MutationPromise<SetOrderQuoteData, SetOrderQuoteVariables>;
+export function setOrderQuote(dc: DataConnect, vars: SetOrderQuoteVariables): MutationPromise<SetOrderQuoteData, SetOrderQuoteVariables>;
+
+interface UpdateOrderItemPriceRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateOrderItemPriceVariables): MutationRef<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateOrderItemPriceVariables): MutationRef<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+  operationName: string;
+}
+export const updateOrderItemPriceRef: UpdateOrderItemPriceRef;
+
+export function updateOrderItemPrice(vars: UpdateOrderItemPriceVariables): MutationPromise<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
+export function updateOrderItemPrice(dc: DataConnect, vars: UpdateOrderItemPriceVariables): MutationPromise<UpdateOrderItemPriceData, UpdateOrderItemPriceVariables>;
 
 interface CreateCategoryRef {
   /* Allow users to create refs without passing in DataConnect */

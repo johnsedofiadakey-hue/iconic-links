@@ -146,3 +146,14 @@ type Delivery @table {
   createdAt: Timestamp! @default(expr: "request.time")
   updatedAt: Timestamp! @default(expr: "request.time")
 }
+
+type AuditLog @table {
+  id: UUID! @default(expr: "uuidV4()")
+  action: String!
+  userId: String!
+  orderId: String
+  previousValue: Any
+  newValue: Any
+  notes: String
+  createdAt: Timestamp! @default(expr: "request.time")
+}

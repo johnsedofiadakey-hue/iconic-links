@@ -118,6 +118,7 @@ export default function LoginPage() {
                     placeholder="e.g. 0241234567"
                   />
                 </div>
+                <p className="mt-1 text-xs text-gray-500">We'll use +233 (Ghana) if you don't include a country code.</p>
               </div>
 
               <div>
