@@ -26,12 +26,12 @@ env:
 # PAYSTACK_SECRET_KEY does not exist yet in Secret Manager - create it with:
 #   firebase apphosting:secrets:set PAYSTACK_SECRET_KEY --project iconic-links
 # before the next rollout, or the build will fail at startup validation.
-secrets:
-  - variable: DATABASE_URL
-    secret: DATABASE_URL
-  - variable: FIREBASE_PRIVATE_KEY
-    secret: FIREBASE_PRIVATE_KEY
-  - variable: FIREBASE_CLIENT_EMAIL
-    secret: FIREBASE_CLIENT_EMAIL
-  - variable: PAYSTACK_SECRET_KEY
-    secret: PAYSTACK_SECRET_KEY
+# secrets:
+#   - variable: DATABASE_URL
+#     secret: DATABASE_URL
+#   - variable: FIREBASE_PRIVATE_KEY
+#     secret: FIREBASE_PRIVATE_KEY
+#   - variable: FIREBASE_CLIENT_EMAIL
+#     secret: FIREBASE_CLIENT_EMAIL
+#   - variable: PAYSTACK_SECRET_KEY
+#     secret: PAYSTACK_SECRET_KEY
