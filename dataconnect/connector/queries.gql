@@ -167,6 +167,16 @@ query ListUsersByRole($role: String!) @auth(level: PUBLIC) {
   }
 }
 
+query ListAllUsers @auth(level: PUBLIC) {
+  users(orderBy: { role: ASC }) {
+    id
+    name
+    email
+    phone
+    role
+  }
+}
+
 query ListAllOrdersForIntelligence @auth(level: PUBLIC) {
   orders(orderBy: { createdAt: DESC }) {
     id

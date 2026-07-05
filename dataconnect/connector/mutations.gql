@@ -58,6 +58,11 @@ mutation UpdateUserOrganization($id: UUID!, $organizationId: UUID!) @auth(level:
   user_update(id: $id, data: { organizationId: $organizationId })
 }
 
+# Update a user's role
+mutation UpdateUserRole($id: UUID!, $role: String!) @auth(level: PUBLIC) {
+  user_update(id: $id, data: { role: $role })
+}
+
 mutation CreateProof($orderId: UUID!, $fileUrl: String!, $version: Int!, $status: String!) @auth(level: PUBLIC) {
   proof_insert(data: { orderId: $orderId, fileUrl: $fileUrl, version: $version, status: $status })
 }

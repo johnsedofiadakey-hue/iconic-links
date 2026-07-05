@@ -10,7 +10,9 @@ import {
   Truck, 
   CheckCircle,
   Building2,
-  LineChart
+  LineChart,
+  Users,
+  QrCode
 } from 'lucide-react';
 
 const navItems = [
@@ -20,7 +22,9 @@ const navItems = [
   { name: 'Quality Control', href: '/admin/qc', icon: CheckCircle },
   { name: 'Delivery Dispatch', href: '/admin/delivery', icon: Truck },
   { name: 'Corporate Accounts', href: '/admin/organizations', icon: Building2 },
+  { name: 'Staff Management', href: '/admin/staff', icon: Users },
   { name: 'Intelligence', href: '/admin/intelligence', icon: LineChart },
+  { name: 'QR Generator', href: '/admin/qr-generator', icon: QrCode },
 ];
 
 export default function Sidebar() {

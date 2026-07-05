@@ -255,26 +255,26 @@ export interface GetOrderWithDetailsData {
       phone?: string | null;
       email?: string | null;
     };
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        price: number;
-        specs?: unknown | null;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
-        proofs_on_order: ({
-          id: UUIDString;
-          version: number;
-          status: string;
-          fileUrl: string;
-        } & Proof_Key)[];
-          payments_on_order: ({
-            id: UUIDString;
-            amount: number;
-            status: string;
-          } & Payment_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      price: number;
+      specs?: unknown | null;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
+    proofs_on_order: ({
+      id: UUIDString;
+      version: number;
+      status: string;
+      fileUrl: string;
+    } & Proof_Key)[];
+    payments_on_order: ({
+      id: UUIDString;
+      amount: number;
+      status: string;
+    } & Payment_Key)[];
   } & Order_Key;
 }
 
@@ -411,10 +411,20 @@ export interface ListAllOrdersForIntelligenceData {
       name?: string | null;
       phone?: string | null;
     } & User_Key;
-      materialConsumptions_on_order: ({
-        workerId?: UUIDString | null;
-      })[];
+    materialConsumptions_on_order: ({
+      workerId?: UUIDString | null;
+    })[];
   } & Order_Key)[];
+}
+
+export interface ListAllUsersData {
+  users: ({
+    id: UUIDString;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    role: string;
+  } & User_Key)[];
 }
 
 export interface ListCategoriesData {
@@ -467,17 +477,17 @@ export interface ListOrdersByUserWithDetailsData {
         name: string;
       };
     } & OrderItem_Key)[];
-      payments_on_order: ({
-        id: UUIDString;
-        status: string;
-      } & Payment_Key)[];
-        proofs_on_order: ({
-          id: UUIDString;
-          version: number;
-          status: string;
-          fileUrl: string;
-          comments?: string | null;
-        } & Proof_Key)[];
+    payments_on_order: ({
+      id: UUIDString;
+      status: string;
+    } & Payment_Key)[];
+    proofs_on_order: ({
+      id: UUIDString;
+      version: number;
+      status: string;
+      fileUrl: string;
+      comments?: string | null;
+    } & Proof_Key)[];
   } & Order_Key)[];
 }
 
@@ -494,13 +504,13 @@ export interface ListOrdersForQcData {
       name?: string | null;
       phone?: string | null;
     };
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 
@@ -529,14 +539,14 @@ export interface ListRecentOrdersData {
       email?: string | null;
       phone?: string | null;
     } & User_Key;
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        price: number;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      price: number;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 
@@ -688,6 +698,15 @@ export interface UpdateUserOrganizationData {
 export interface UpdateUserOrganizationVariables {
   id: UUIDString;
   organizationId: UUIDString;
+}
+
+export interface UpdateUserRoleData {
+  user_update?: User_Key | null;
+}
+
+export interface UpdateUserRoleVariables {
+  id: UUIDString;
+  role: string;
 }
 
 export interface User_Key {
@@ -874,6 +893,18 @@ export const updateUserOrganizationRef: UpdateUserOrganizationRef;
 
 export function updateUserOrganization(vars: UpdateUserOrganizationVariables): MutationPromise<UpdateUserOrganizationData, UpdateUserOrganizationVariables>;
 export function updateUserOrganization(dc: DataConnect, vars: UpdateUserOrganizationVariables): MutationPromise<UpdateUserOrganizationData, UpdateUserOrganizationVariables>;
+
+interface UpdateUserRoleRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateUserRoleVariables): MutationRef<UpdateUserRoleData, UpdateUserRoleVariables>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect, vars: UpdateUserRoleVariables): MutationRef<UpdateUserRoleData, UpdateUserRoleVariables>;
+  operationName: string;
+}
+export const updateUserRoleRef: UpdateUserRoleRef;
+
+export function updateUserRole(vars: UpdateUserRoleVariables): MutationPromise<UpdateUserRoleData, UpdateUserRoleVariables>;
+export function updateUserRole(dc: DataConnect, vars: UpdateUserRoleVariables): MutationPromise<UpdateUserRoleData, UpdateUserRoleVariables>;
 
 interface CreateProofRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -1126,6 +1157,18 @@ export const listUsersByRoleRef: ListUsersByRoleRef;
 
 export function listUsersByRole(vars: ListUsersByRoleVariables, options?: ExecuteQueryOptions): QueryPromise<ListUsersByRoleData, ListUsersByRoleVariables>;
 export function listUsersByRole(dc: DataConnect, vars: ListUsersByRoleVariables, options?: ExecuteQueryOptions): QueryPromise<ListUsersByRoleData, ListUsersByRoleVariables>;
+
+interface ListAllUsersRef {
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllUsersData, undefined>;
+  /* Allow users to pass in custom DataConnect instances */
+  (dc: DataConnect): QueryRef<ListAllUsersData, undefined>;
+  operationName: string;
+}
+export const listAllUsersRef: ListAllUsersRef;
+
+export function listAllUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+export function listAllUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
 
 interface ListAllOrdersForIntelligenceRef {
   /* Allow users to create refs without passing in DataConnect */

@@ -76,7 +76,8 @@ export default function LoginPage() {
         throw new Error('Failed to create session');
       }
     } catch (err: any) {
-      setError('Invalid OTP. Please check and try again.');
+      console.error("OTP Verification Error:", err);
+      setError(err.message || 'Invalid OTP. Please check and try again.');
     } finally {
       setLoading(false);
     }

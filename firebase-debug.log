@@ -1,0 +1,95 @@
+[debug] [2026-07-05T17:07:56.132Z] ----------------------------------------------------------------------
+[debug] [2026-07-05T17:07:56.136Z] Command:       /Users/macbook/.nvm/versions/node/v24.12.0/bin/node /Users/macbook/.npm/_npx/ba4f1959e38407b5/node_modules/.bin/firebase deploy --project iconic-links
+[debug] [2026-07-05T17:07:56.136Z] CLI Version:   15.22.4
+[debug] [2026-07-05T17:07:56.136Z] Platform:      darwin
+[debug] [2026-07-05T17:07:56.136Z] Node Version:  v24.12.0
+[debug] [2026-07-05T17:07:56.136Z] Detected Agent: antigravity
+[debug] [2026-07-05T17:07:56.136Z] Time:          Sun Jul 05 2026 17:07:56 GMT+0000 (Greenwich Mean Time)
+[debug] [2026-07-05T17:07:56.137Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-07-05T17:07:58.010Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-07-05T17:07:58.010Z] > authorizing via signed-in user (prinzejohnson@gmail.com)
+[debug] [2026-07-05T17:07:58.011Z] [iam] checking project iconic-links for permissions ["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update"]
+[debug] [2026-07-05T17:07:58.012Z] Checked if tokens are valid: false, expires at: 1783196532409
+[debug] [2026-07-05T17:07:58.012Z] Checked if tokens are valid: false, expires at: 1783196532409
+[debug] [2026-07-05T17:07:58.012Z] > refreshing access token with scopes: []
+[debug] [2026-07-05T17:07:58.014Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-07-05T17:07:58.015Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T17:07:58.487Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-07-05T17:07:58.487Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-07-05T17:07:58.538Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/iconic-links:testIamPermissions [none]
+[debug] [2026-07-05T17:07:58.538Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/iconic-links:testIamPermissions  x-goog-user-project=iconic-links
+[debug] [2026-07-05T17:07:58.538Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/iconic-links:testIamPermissions {"permissions":["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update"]}
+[debug] [2026-07-05T17:07:59.064Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/iconic-links:testIamPermissions 200
+[debug] [2026-07-05T17:07:59.064Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/iconic-links:testIamPermissions {"permissions":["cloudsql.databases.create","cloudsql.databases.update","cloudsql.instances.connect","cloudsql.instances.create","cloudsql.instances.get","cloudsql.instances.list","cloudsql.instances.update","cloudsql.users.create","firebase.projects.get","firebasedataconnect.connectors.create","firebasedataconnect.connectors.delete","firebasedataconnect.connectors.list","firebasedataconnect.connectors.update","firebasedataconnect.operations.get","firebasedataconnect.schemas.create","firebasedataconnect.schemas.delete","firebasedataconnect.schemas.list","firebasedataconnect.schemas.update","firebasedataconnect.services.create","firebasedataconnect.services.delete","firebasedataconnect.services.list","firebasedataconnect.services.update","firebasehosting.sites.update"]}
+[debug] [2026-07-05T17:07:59.065Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:07:59.065Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:07:59.065Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/iconic-links [none]
+[debug] [2026-07-05T17:07:59.603Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/iconic-links 200
+[debug] [2026-07-05T17:07:59.603Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/iconic-links {"projectId":"iconic-links","projectNumber":"867641799137","displayName":"ICONIC LINKS ","name":"projects/iconic-links","resources":{"hostingSite":"iconic-links"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_650808a3-92ea-4140-920e-93d9414d0234"}
+[debug] [2026-07-05T17:08:01.695Z] defaultcredentials: writing to file /Users/macbook/.config/firebase/prinzejohnson_gmail_com_application_default_credentials.json
+[debug] [2026-07-05T17:08:01.697Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:01.697Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:01.697Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites pageToken=&pageSize=10
+[debug] [2026-07-05T17:08:03.422Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites 200
+[debug] [2026-07-05T17:08:03.422Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites {"sites":[{"name":"projects/iconic-links/sites/iconic-links","defaultUrl":"https://iconic-links.web.app","appId":"1:867641799137:web:df190a551d9037970762a0","type":"DEFAULT_SITE"}]}
+[debug] [2026-07-05T17:08:03.422Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:03.422Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:03.423Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:867641799137:web:df190a551d9037970762a0/config [none]
+[debug] [2026-07-05T17:08:04.480Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:867641799137:web:df190a551d9037970762a0/config 200
+[debug] [2026-07-05T17:08:04.480Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/-/webApps/1:867641799137:web:df190a551d9037970762a0/config {"projectId":"iconic-links","appId":"1:867641799137:web:df190a551d9037970762a0","storageBucket":"iconic-links.firebasestorage.app","apiKey":"AIzaSyBowdMfScrajlvbQ3_LqJXpqGbsaG40Ckk","authDomain":"iconic-links.firebaseapp.com","messagingSenderId":"867641799137","measurementId":"G-5R66D21C5R","projectNumber":"867641799137","version":"2"}
+[info] 
+   Thank you for trying our early preview of Next.js support on Firebase Hosting.
+   During the preview, support is best-effort and breaking changes can be expected. Proceed with caution.
+   The integration is known to work with Next.js version 12 - 16.0. You may encounter errors.
+
+   Documentation: https://firebase.google.com/docs/hosting/frameworks/nextjs
+   File a bug: https://github.com/firebase/firebase-tools/issues/new?template=bug_report.md
+   Submit a feature request: https://github.com/firebase/firebase-tools/issues/new?template=feature_request.md
+
+   We'd love to learn from you. Express your interest in helping us shape the future of Firebase Hosting: https://goo.gle/41enW5X
+
+[debug] [2026-07-05T17:08:08.944Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:08.944Z] Checked if tokens are valid: true, expires at: 1783274877487
+[debug] [2026-07-05T17:08:08.945Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites/iconic-links [none]
+[debug] [2026-07-05T17:08:10.339Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites/iconic-links 200
+[debug] [2026-07-05T17:08:10.340Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/iconic-links/sites/iconic-links {"name":"projects/iconic-links/sites/iconic-links","defaultUrl":"https://iconic-links.web.app","appId":"1:867641799137:web:df190a551d9037970762a0","type":"DEFAULT_SITE"}
+[info] ▲ Next.js 16.2.9 (Turbopack)
+
+[info] - Environments: .env.local, .env.production
+
+
+[info] ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+[info]   Creating an optimized production build ...
+
+[info] ✓ Compiled successfully in 6.9s
+
+[info]   Running TypeScript ...
+
+[info] Failed to type check.
+
+
+[info] ./src/app/order/page.tsx:36:20
+Type error: Type '({ id: string; name: string; imageUrl?: string | null | undefined; services_on_category: ({ id: string; name: string; pricingType: string; basePrice?: number | null | undefined; } & Service_Key)[]; } & Category_Key)[]' is not assignable to type 'Category[]'.
+  Type '{ id: string; name: string; imageUrl?: string | null | undefined; services_on_category: ({ id: string; name: string; pricingType: string; basePrice?: number | null | undefined; } & Service_Key)[]; } & Category_Key' is not assignable to type 'Category'.
+    Types of property 'services_on_category' are incompatible.
+      Type '({ id: string; name: string; pricingType: string; basePrice?: number | null | undefined; } & Service_Key)[]' is not assignable to type 'Service[]'.
+        Type '{ id: string; name: string; pricingType: string; basePrice?: number | null | undefined; } & Service_Key' is not assignable to type 'Service'.
+          Types of property 'basePrice' are incompatible.
+            Type 'number | null | undefined' is not assignable to type 'number | null'.
+              Type 'undefined' is not assignable to type 'number | null'.
+
+  34 |
+  35 |       <main className="max-w-4xl mx-auto px-4 pt-8">
+> 36 |         <OrderFlow categories={categories} />
+     |                    ^
+  37 |       </main>
+  38 |     </div>
+  39 |   );
+
+[info] Next.js build worker exited with code: 1 and signal: null
+
+[debug] [2026-07-05T17:08:26.208Z] Error: ENOENT: no such file or directory, open '/Users/macbook/Documents/iconic-links/.next/export-marker.json'
+[error] 
+[error] Error: An unexpected error has occurred.

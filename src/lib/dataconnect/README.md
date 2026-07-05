@@ -22,6 +22,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*ListRecentOrders*](#listrecentorders)
   - [*ListActiveDeliveries*](#listactivedeliveries)
   - [*ListUsersByRole*](#listusersbyrole)
+  - [*ListAllUsers*](#listallusers)
   - [*ListAllOrdersForIntelligence*](#listallordersforintelligence)
   - [*ListWastedConsumptions*](#listwastedconsumptions)
   - [*GetOrderWithDetails*](#getorderwithdetails)
@@ -47,6 +48,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*UpdateDelivery*](#updatedelivery)
   - [*CreateOrganization*](#createorganization)
   - [*UpdateUserOrganization*](#updateuserorganization)
+  - [*UpdateUserRole*](#updateuserrole)
   - [*CreateProof*](#createproof)
   - [*UpdateProof*](#updateproof)
   - [*CreateStaffProfile*](#createstaffprofile)
@@ -1385,14 +1387,14 @@ export interface ListRecentOrdersData {
       email?: string | null;
       phone?: string | null;
     } & User_Key;
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        price: number;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      price: number;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -1662,6 +1664,103 @@ executeQuery(ref).then((response) => {
 });
 ```
 
+## ListAllUsers
+You can execute the `ListAllUsers` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+listAllUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+
+interface ListAllUsersRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (): QueryRef<ListAllUsersData, undefined>;
+}
+export const listAllUsersRef: ListAllUsersRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
+```typescript
+listAllUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllUsersData, undefined>;
+
+interface ListAllUsersRef {
+  ...
+  (dc: DataConnect): QueryRef<ListAllUsersData, undefined>;
+}
+export const listAllUsersRef: ListAllUsersRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllUsersRef:
+```typescript
+const name = listAllUsersRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `ListAllUsers` query has no variables.
+### Return Type
+Recall that executing the `ListAllUsers` query returns a `QueryPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `ListAllUsersData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface ListAllUsersData {
+  users: ({
+    id: UUIDString;
+    name?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    role: string;
+  } & User_Key)[];
+}
+```
+### Using `ListAllUsers`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, listAllUsers } from '@iconic-links/dataconnect';
+
+
+// Call the `listAllUsers()` function to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await listAllUsers();
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await listAllUsers(dataConnect);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+listAllUsers().then((response) => {
+  const data = response.data;
+  console.log(data.users);
+});
+```
+
+### Using `ListAllUsers`'s `QueryRef` function
+
+```typescript
+import { getDataConnect, executeQuery } from 'firebase/data-connect';
+import { connectorConfig, listAllUsersRef } from '@iconic-links/dataconnect';
+
+
+// Call the `listAllUsersRef()` function to get a reference to the query.
+const ref = listAllUsersRef();
+
+// You can also pass in a `DataConnect` instance to the `QueryRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = listAllUsersRef(dataConnect);
+
+// Call `executeQuery()` on the reference to execute the query.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeQuery(ref);
+
+console.log(data.users);
+
+// Or, you can use the `Promise` API.
+executeQuery(ref).then((response) => {
+  const data = response.data;
+  console.log(data.users);
+});
+```
+
 ## ListAllOrdersForIntelligence
 You can execute the `ListAllOrdersForIntelligence` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
 ```typescript
@@ -1709,9 +1808,9 @@ export interface ListAllOrdersForIntelligenceData {
       name?: string | null;
       phone?: string | null;
     } & User_Key;
-      materialConsumptions_on_order: ({
-        workerId?: UUIDString | null;
-      })[];
+    materialConsumptions_on_order: ({
+      workerId?: UUIDString | null;
+    })[];
   } & Order_Key)[];
 }
 ```
@@ -1916,26 +2015,26 @@ export interface GetOrderWithDetailsData {
       phone?: string | null;
       email?: string | null;
     };
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        price: number;
-        specs?: unknown | null;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
-        proofs_on_order: ({
-          id: UUIDString;
-          version: number;
-          status: string;
-          fileUrl: string;
-        } & Proof_Key)[];
-          payments_on_order: ({
-            id: UUIDString;
-            amount: number;
-            status: string;
-          } & Payment_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      price: number;
+      specs?: unknown | null;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
+    proofs_on_order: ({
+      id: UUIDString;
+      version: number;
+      status: string;
+      fileUrl: string;
+    } & Proof_Key)[];
+    payments_on_order: ({
+      id: UUIDString;
+      amount: number;
+      status: string;
+    } & Payment_Key)[];
   } & Order_Key;
 }
 ```
@@ -2047,13 +2146,13 @@ export interface ListOrdersForQcData {
       name?: string | null;
       phone?: string | null;
     };
-      orderItems_on_order: ({
-        id: UUIDString;
-        quantity: number;
-        service: {
-          name: string;
-        };
-      } & OrderItem_Key)[];
+    orderItems_on_order: ({
+      id: UUIDString;
+      quantity: number;
+      service: {
+        name: string;
+      };
+    } & OrderItem_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -2163,17 +2262,17 @@ export interface ListOrdersByUserWithDetailsData {
         name: string;
       };
     } & OrderItem_Key)[];
-      payments_on_order: ({
-        id: UUIDString;
-        status: string;
-      } & Payment_Key)[];
-        proofs_on_order: ({
-          id: UUIDString;
-          version: number;
-          status: string;
-          fileUrl: string;
-          comments?: string | null;
-        } & Proof_Key)[];
+    payments_on_order: ({
+      id: UUIDString;
+      status: string;
+    } & Payment_Key)[];
+    proofs_on_order: ({
+      id: UUIDString;
+      version: number;
+      status: string;
+      fileUrl: string;
+      comments?: string | null;
+    } & Proof_Key)[];
   } & Order_Key)[];
 }
 ```
@@ -4415,6 +4514,118 @@ const ref = updateUserOrganizationRef({ id: ..., organizationId: ..., });
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = updateUserOrganizationRef(dataConnect, updateUserOrganizationVars);
+
+// Call `executeMutation()` on the reference to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await executeMutation(ref);
+
+console.log(data.user_update);
+
+// Or, you can use the `Promise` API.
+executeMutation(ref).then((response) => {
+  const data = response.data;
+  console.log(data.user_update);
+});
+```
+
+## UpdateUserRole
+You can execute the `UpdateUserRole` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect/index.d.ts](./index.d.ts):
+```typescript
+updateUserRole(vars: UpdateUserRoleVariables): MutationPromise<UpdateUserRoleData, UpdateUserRoleVariables>;
+
+interface UpdateUserRoleRef {
+  ...
+  /* Allow users to create refs without passing in DataConnect */
+  (vars: UpdateUserRoleVariables): MutationRef<UpdateUserRoleData, UpdateUserRoleVariables>;
+}
+export const updateUserRoleRef: UpdateUserRoleRef;
+```
+You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
+```typescript
+updateUserRole(dc: DataConnect, vars: UpdateUserRoleVariables): MutationPromise<UpdateUserRoleData, UpdateUserRoleVariables>;
+
+interface UpdateUserRoleRef {
+  ...
+  (dc: DataConnect, vars: UpdateUserRoleVariables): MutationRef<UpdateUserRoleData, UpdateUserRoleVariables>;
+}
+export const updateUserRoleRef: UpdateUserRoleRef;
+```
+
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the updateUserRoleRef:
+```typescript
+const name = updateUserRoleRef.operationName;
+console.log(name);
+```
+
+### Variables
+The `UpdateUserRole` mutation requires an argument of type `UpdateUserRoleVariables`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+
+```typescript
+export interface UpdateUserRoleVariables {
+  id: UUIDString;
+  role: string;
+}
+```
+### Return Type
+Recall that executing the `UpdateUserRole` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+
+The `data` property is an object of type `UpdateUserRoleData`, which is defined in [dataconnect/index.d.ts](./index.d.ts). It has the following fields:
+```typescript
+export interface UpdateUserRoleData {
+  user_update?: User_Key | null;
+}
+```
+### Using `UpdateUserRole`'s action shortcut function
+
+```typescript
+import { getDataConnect } from 'firebase/data-connect';
+import { connectorConfig, updateUserRole, UpdateUserRoleVariables } from '@iconic-links/dataconnect';
+
+// The `UpdateUserRole` mutation requires an argument of type `UpdateUserRoleVariables`:
+const updateUserRoleVars: UpdateUserRoleVariables = {
+  id: ..., 
+  role: ..., 
+};
+
+// Call the `updateUserRole()` function to execute the mutation.
+// You can use the `await` keyword to wait for the promise to resolve.
+const { data } = await updateUserRole(updateUserRoleVars);
+// Variables can be defined inline as well.
+const { data } = await updateUserRole({ id: ..., role: ..., });
+
+// You can also pass in a `DataConnect` instance to the action shortcut function.
+const dataConnect = getDataConnect(connectorConfig);
+const { data } = await updateUserRole(dataConnect, updateUserRoleVars);
+
+console.log(data.user_update);
+
+// Or, you can use the `Promise` API.
+updateUserRole(updateUserRoleVars).then((response) => {
+  const data = response.data;
+  console.log(data.user_update);
+});
+```
+
+### Using `UpdateUserRole`'s `MutationRef` function
+
+```typescript
+import { getDataConnect, executeMutation } from 'firebase/data-connect';
+import { connectorConfig, updateUserRoleRef, UpdateUserRoleVariables } from '@iconic-links/dataconnect';
+
+// The `UpdateUserRole` mutation requires an argument of type `UpdateUserRoleVariables`:
+const updateUserRoleVars: UpdateUserRoleVariables = {
+  id: ..., 
+  role: ..., 
+};
+
+// Call the `updateUserRoleRef()` function to get a reference to the mutation.
+const ref = updateUserRoleRef(updateUserRoleVars);
+// Variables can be defined inline as well.
+const ref = updateUserRoleRef({ id: ..., role: ..., });
+
+// You can also pass in a `DataConnect` instance to the `MutationRef` function.
+const dataConnect = getDataConnect(connectorConfig);
+const ref = updateUserRoleRef(dataConnect, updateUserRoleVars);
 
 // Call `executeMutation()` on the reference to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.
