@@ -12,8 +12,14 @@ if (!getApps().length) {
       }),
     });
   } else {
-    // Fallback for Next.js build step
-    initializeApp({ projectId: 'iconic-links' });
+    try {
+      // Try to initialize using Application Default Credentials (ADC)
+      // This is the default behavior on GCP (Cloud Functions, Cloud Run)
+      initializeApp();
+    } catch (error) {
+      // Fallback for Next.js build step or local dev without credentials
+      initializeApp({ projectId: 'iconic-links' });
+    }
   }
 }
 
