@@ -31,8 +31,12 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // Format phone number. Assumption: user enters local or intl format, we prepend +233 if local.
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+233${phoneNumber.replace(/^0/, '')}`;
+      // Ensure it's exactly 9 digits after stripping leading 0
+      const localNumber = phoneNumber.replace(/^0/, '').replace(/\D/g, '');
+      if (localNumber.length !== 9) {
+        throw new Error('Please enter a valid 9-digit or 10-digit Ghana mobile number.');
+      }
+      const formattedPhone = `+233${localNumber}`;
       
       const appVerifier = (window as any).recaptchaVerifier;
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
@@ -105,7 +109,7 @@ export default function LoginPage() {
                 </label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
+                    <span className="text-gray-500 sm:text-sm font-medium">+233</span>
                   </div>
                   <input
                     id="phone"
@@ -113,12 +117,12 @@ export default function LoginPage() {
                     type="tel"
                     required
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md h-10 border px-3"
-                    placeholder="e.g. 0241234567"
+                    onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-12 sm:text-sm border-gray-300 rounded-md h-10 border px-3"
+                    placeholder="24 123 4567"
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-500">We'll use +233 (Ghana) if you don't include a country code.</p>
+                <p className="mt-1 text-xs text-gray-500">Enter your 9 or 10-digit Ghana mobile number.</p>
               </div>
 
               <div>
