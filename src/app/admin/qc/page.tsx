@@ -1,69 +1,48 @@
-import { hasPermission } from '@/lib/rbac';
-import { cookies } from 'next/headers';
-import { adminAuth } from '@/lib/firebase/admin';
-import { redirect } from 'next/navigation';
+import { requireAdminAuth } from '@/lib/auth';
+import { ROLE_PERMISSIONS } from '@/lib/rbac';
 import Link from 'next/link';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import QCActionButtons from './QCActionButtons';
-import { getUserByIdentifier, listOrdersForQc } from '@/lib/db';
+import { listOrdersForQc } from '@/lib/db';
+import { STATUS_COLORS, STATUS_LABELS } from '@/lib/constants';
 
 export default async function QCDashboard() {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session')?.value;
+  const user = await requireAdminAuth(ROLE_PERMISSIONS.QC as unknown as string[]);
 
-  if (!sessionCookie) redirect('/admin/login');
-
-  let user;
-  try {
-    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const identifier = decodedClaims.email || decodedClaims.phone_number;
-    if (identifier) {
-      const userResult = await getUserByIdentifier({ identifier });
-      if (userResult.data.users.length > 0) {
-        user = userResult.data.users[0];
-      }
-    }
-  } catch {
-    redirect('/admin/login');
-  }
-
-  if (!user || !hasPermission(user.role, 'QC')) {
-    redirect('/admin/dashboard');
-  }
-
-  // QC Officer mostly cares about things that have finished printing/finishing
   const ordersResult = await listOrdersForQc();
   const orders = ordersResult.data.orders;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <header className="bg-gray-900 text-white p-6 shadow-md flex justify-between items-center">
-        <h1 className="text-xl font-bold max-w-5xl mx-auto w-full">Quality Control Dashboard</h1>
+    <div className="min-h-screen bg-[var(--brand-surface)] pb-12">
+      <header className="glass sticky top-0 z-10 border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 ml-10 md:ml-0">
+          <h1 className="text-xl font-bold text-gray-900">Quality Control</h1>
+          <p className="text-sm text-gray-500">Review completed print jobs</p>
+        </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 pt-8">
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {orders.map((order: any) => (
-              <li key={order.id} className="p-6 hover:bg-gray-50 transition">
-                <div className="flex justify-between items-start mb-4">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+        <div className="space-y-4">
+          {orders.map((order: any) => (
+            <div key={order.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden card-interactive">
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <Link href={`/admin/orders/${order.id}`} className="text-lg font-bold text-blue-600 hover:underline">
+                    <Link href={`/admin/orders/${order.id}`} className="text-base font-bold text-blue-600 hover:underline">
                       Order #{order.orderNumber}
                     </Link>
-                    <p className="text-sm text-gray-500 mt-1">{order.user?.name || order.user?.phone}</p>
+                    <p className="text-sm text-gray-500 mt-0.5">{order.user?.name || order.user?.phone}</p>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    order.status === 'QC_REJECTED' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {order.status}
+                  <span className={`px-3 py-1 rounded-lg text-xs font-bold ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700'}`}>
+                    {STATUS_LABELS[order.status] || order.status}
                   </span>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded border border-gray-100 mb-4">
-                  {order.orderItems_on_order?.map((item: any, i: number) => (
-                    <div key={item.id} className="mb-2 last:mb-0 text-sm">
-                      <span className="font-bold text-gray-900">{item.service?.name}</span> (Qty: {item.quantity})
+                <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 mb-4">
+                  {order.orderItems_on_order?.map((item: any) => (
+                    <div key={item.id} className="mb-1.5 last:mb-0 text-sm">
+                      <span className="font-semibold text-gray-900">{item.service?.name}</span>
+                      <span className="text-gray-400 ml-2">Qty: {item.quantity}</span>
                     </div>
                   ))}
                 </div>
@@ -71,15 +50,16 @@ export default async function QCDashboard() {
                 {order.status !== 'QC_REJECTED' && (
                   <QCActionButtons orderId={order.id} userId={user.id} />
                 )}
-              </li>
-            ))}
-            {orders.length === 0 && (
-              <li className="px-6 py-12 text-center text-gray-500">
-                <CheckCircle className="mx-auto h-12 w-12 text-gray-300 mb-3" />
-                <p>No orders pending quality control.</p>
-              </li>
-            )}
-          </ul>
+              </div>
+            </div>
+          ))}
+          {orders.length === 0 && (
+            <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <CheckCircle className="mx-auto h-12 w-12 text-emerald-200 mb-3" />
+              <h3 className="font-bold text-gray-900">All Clear</h3>
+              <p className="text-gray-500 text-sm mt-1">No orders pending quality control.</p>
+            </div>
+          )}
         </div>
       </main>
     </div>
